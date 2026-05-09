@@ -1,7 +1,7 @@
 {
-  "iteration": "002_f1_features",
-  "cv_auc": 0.9491,
-  "cv_std": 0.0008,
+  "iteration": "004_target_encode_fix",
+  "cv_auc": 0.9497,
+  "cv_std": 0.0009,
   "lb_auc": null,
-  "submission_file": "iterations/002_f1_features/kernel_output/submission.csv"
+  "submission_file": "iterations/004_target_encode_fix/kernel_output/submission.csv"
 }
