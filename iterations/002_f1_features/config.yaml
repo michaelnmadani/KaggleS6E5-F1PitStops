@@ -1,0 +1,37 @@
+# Iteration 002 — F1 domain feature engineering.
+# Adds all four pre-built F1 feature blocks on top of the 001_baseline params.
+# Expected: +0.004–0.008 AUC from tyre degradation, gap, stint, and position features.
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - label_encode
+
+model: lgbm
+
+params:
+  num_boost_round: 2000
+  early_stopping_rounds: 100
+  learning_rate: 0.05
+  num_leaves: 63
+  min_data_in_leaf: 50
+  feature_fraction: 0.9
+  bagging_fraction: 0.9
+  bagging_freq: 5
+  lambda_l2: 1.0
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
