@@ -1,0 +1,39 @@
+
+# Iteration 003 — per-fold target encoding + LGBM tuning.
+# Replaces label_encode with target_encode_binary for categorical columns.
+# Also deepens tree (num_leaves 63→127) and lowers LR (0.05→0.03).
+# Expected: +0.004–0.008 AUC over 002_f1_features (0.9491).
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - target_encode_binary
+
+model: lgbm
+
+params:
+  num_boost_round: 3000
+  early_stopping_rounds: 100
+  learning_rate: 0.03
+  num_leaves: 127
+  min_data_in_leaf: 50
+  feature_fraction: 0.9
+  bagging_fraction: 0.9
+  bagging_freq: 5
+  lambda_l2: 1.0
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false

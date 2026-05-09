@@ -1,0 +1,113 @@
+[{"stream_name":"stderr","time":8.180492677,"data":"/usr/local/lib/python3.12/dist-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":8.180558249,"data":"  validate(nb)\n"}
+,{"stream_name":"stderr","time":9.495249433,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.495281751,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.49528805,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.495293139,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":10.372250081,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":10.372373676,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":10.372385025,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":10.372391823,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":15.784683949,"data":"mounts under /kaggle/input: ['competitions']\n"}
+,{"stream_name":"stdout","time":15.784746691,"data":"  competitions/: ['playground-series-s6e5']\n"}
+,{"stream_name":"stdout","time":15.784753684,"data":"FALLBACK input_dir=/kaggle/input/competitions/playground-series-s6e5\n"}
+,{"stream_name":"stderr","time":23.590015292,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":23.590047907,"data":"  File \"\u003cstring\u003e\", line 1, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":23.590055566,"data":"  File \"/usr/local/lib/python3.12/dist-packages/papermill/execute.py\", line 131, in execute_notebook\n"}
+,{"stream_name":"stderr","time":23.590172787,"data":"    raise_for_execution_errors(nb, output_path)\n"}
+,{"stream_name":"stderr","time":23.590182932,"data":"  File \"/usr/local/lib/python3.12/dist-packages/papermill/execute.py\", line 251, in raise_for_execution_errors\n"}
+,{"stream_name":"stderr","time":23.590356893,"data":"    raise error\n"}
+,{"stream_name":"stderr","time":23.590978092,"data":"papermill.exceptions.PapermillExecutionError: \n"}
+,{"stream_name":"stderr","time":23.591000537,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":23.591005684,"data":"Exception encountered at \"In [6]\":\n"}
+,{"stream_name":"stderr","time":23.591020984,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":23.591027989,"data":"ValueError                                Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":23.591033546,"data":"/tmp/ipykernel_16/1748757357.py in \u003ccell line: 0\u003e()\n"}
+,{"stream_name":"stderr","time":23.591039232,"data":"     58 cfg_path = pathlib.Path(\"/kaggle/working/iteration_config.yaml\")\n"}
+,{"stream_name":"stderr","time":23.591044849,"data":"     59 cfg_path.write_text(CONFIG_YAML)\n"}
+,{"stream_name":"stderr","time":23.59105008,"data":"---\u003e 60 metrics = run(\n"}
+,{"stream_name":"stderr","time":23.591055524,"data":"     61     config_path=str(cfg_path),\n"}
+,{"stream_name":"stderr","time":23.591075447,"data":"     62     input_dir=input_dir,\n"}
+,{"stream_name":"stderr","time":23.591080207,"data":"\n"}
+,{"stream_name":"stderr","time":23.591084144,"data":"/tmp/ipykernel_16/2254450353.py in run(config_path, input_dir, output_dir)\n"}
+,{"stream_name":"stderr","time":23.591088458,"data":"    134 \n"}
+,{"stream_name":"stderr","time":23.591092767,"data":"    135         for m in model_names:\n"}
+,{"stream_name":"stderr","time":23.59109728,"data":"--\u003e 136             res = fit_one_fold(\n"}
+,{"stream_name":"stderr","time":23.591101734,"data":"    137                 m, X_tr, y_tr, X_va, y_va, X_te_fold,\n"}
+,{"stream_name":"stderr","time":23.591106039,"data":"    138                 _params_for(m), task, sample_weight=sw,\n"}
+,{"stream_name":"stderr","time":23.59111064,"data":"\n"}
+,{"stream_name":"stderr","time":23.591114821,"data":"/tmp/ipykernel_16/2180274808.py in fit_one_fold(name, X_tr, y_tr, X_val, y_val, X_test, params, task, sample_weight)\n"}
+,{"stream_name":"stderr","time":23.591119291,"data":"    186     if name not in FITTERS:\n"}
+,{"stream_name":"stderr","time":23.591123865,"data":"    187         raise KeyError(f\"unknown model {name!r}; known: {sorted(FITTERS)}\")\n"}
+,{"stream_name":"stderr","time":23.591128939,"data":"--\u003e 188     return FITTERS[name](X_tr, y_tr, X_val, y_val, X_test, params, task, sample_weight=sample_weight)\n"}
+,{"stream_name":"stderr","time":23.591133971,"data":"    189 \n"}
+,{"stream_name":"stderr","time":23.591138212,"data":"    190 \n"}
+,{"stream_name":"stderr","time":23.591142404,"data":"\n"}
+,{"stream_name":"stderr","time":23.591146569,"data":"/tmp/ipykernel_16/2180274808.py in _lgbm_fit(X_tr, y_tr, X_val, y_val, X_test, params, task, sample_weight)\n"}
+,{"stream_name":"stderr","time":23.591151248,"data":"     29     dtr = lgb.Dataset(X_tr, label=y_tr, weight=sample_weight)\n"}
+,{"stream_name":"stderr","time":23.591155925,"data":"     30     dval = lgb.Dataset(X_val, label=y_val, reference=dtr)\n"}
+,{"stream_name":"stderr","time":23.591160947,"data":"---\u003e 31     model = lgb.train(\n"}
+,{"stream_name":"stderr","time":23.591164135,"data":"     32         base,\n"}
+,{"stream_name":"stderr","time":23.591167239,"data":"     33         dtr,\n"}
+,{"stream_name":"stderr","time":23.591170049,"data":"\n"}
+,{"stream_name":"stderr","time":23.591172864,"data":"/usr/local/lib/python3.12/dist-packages/lightgbm/engine.py in train(params, train_set, num_boost_round, valid_sets, valid_names, feval, init_model, keep_training_booster, callbacks)\n"}
+,{"stream_name":"stderr","time":23.591176265,"data":"    295     # construct booster\n"}
+,{"stream_name":"stderr","time":23.591179196,"data":"    296     try:\n"}
+,{"stream_name":"stderr","time":23.591182071,"data":"--\u003e 297         booster = Booster(params=params, train_set=train_set)\n"}
+,{"stream_name":"stderr","time":23.591185175,"data":"    298         if is_valid_contain_train:\n"}
+,{"stream_name":"stderr","time":23.591188134,"data":"    299             booster.set_train_data_name(train_data_name)\n"}
+,{"stream_name":"stderr","time":23.591191987,"data":"\n"}
+,{"stream_name":"stderr","time":23.591197757,"data":"/usr/local/lib/python3.12/dist-packages/lightgbm/basic.py in __init__(self, params, train_set, model_file, model_str)\n"}
+,{"stream_name":"stderr","time":23.591202626,"data":"   3654                 )\n"}
+,{"stream_name":"stderr","time":23.591206756,"data":"   3655             # construct booster object\n"}
+,{"stream_name":"stderr","time":23.591210919,"data":"-\u003e 3656             train_set.construct()\n"}
+,{"stream_name":"stderr","time":23.591215435,"data":"   3657             # copy the parameters from train_set\n"}
+,{"stream_name":"stderr","time":23.591225265,"data":"   3658             params.update(train_set.get_params())\n"}
+,{"stream_name":"stderr","time":23.591230136,"data":"\n"}
+,{"stream_name":"stderr","time":23.591234894,"data":"/usr/local/lib/python3.12/dist-packages/lightgbm/basic.py in construct(self)\n"}
+,{"stream_name":"stderr","time":23.591239681,"data":"   2588             else:\n"}
+,{"stream_name":"stderr","time":23.591243922,"data":"   2589                 # create train\n"}
+,{"stream_name":"stderr","time":23.591248364,"data":"-\u003e 2590                 self._lazy_init(\n"}
+,{"stream_name":"stderr","time":23.591252782,"data":"   2591                     data=self.data,\n"}
+,{"stream_name":"stderr","time":23.591257291,"data":"   2592                     label=self.label,\n"}
+,{"stream_name":"stderr","time":23.591280767,"data":"\n"}
+,{"stream_name":"stderr","time":23.591284181,"data":"/usr/local/lib/python3.12/dist-packages/lightgbm/basic.py in _lazy_init(self, data, label, reference, weight, group, init_score, predictor, feature_name, categorical_feature, params, position)\n"}
+,{"stream_name":"stderr","time":23.59128768,"data":"   2121             categorical_feature = reference.categorical_feature\n"}
+,{"stream_name":"stderr","time":23.591292222,"data":"   2122         if isinstance(data, pd_DataFrame):\n"}
+,{"stream_name":"stderr","time":23.59129652,"data":"-\u003e 2123             data, feature_name, categorical_feature, self.pandas_categorical = _data_from_pandas(\n"}
+,{"stream_name":"stderr","time":23.591301132,"data":"   2124                 data=data,\n"}
+,{"stream_name":"stderr","time":23.591305454,"data":"   2125                 feature_name=feature_name,\n"}
+,{"stream_name":"stderr","time":23.591309745,"data":"\n"}
+,{"stream_name":"stderr","time":23.591313974,"data":"/usr/local/lib/python3.12/dist-packages/lightgbm/basic.py in _data_from_pandas(data, feature_name, categorical_feature, pandas_categorical)\n"}
+,{"stream_name":"stderr","time":23.591318571,"data":"    866 \n"}
+,{"stream_name":"stderr","time":23.591323104,"data":"    867     return (\n"}
+,{"stream_name":"stderr","time":23.591327468,"data":"--\u003e 868         _pandas_to_numpy(data, target_dtype=target_dtype),\n"}
+,{"stream_name":"stderr","time":23.591332225,"data":"    869         feature_name,\n"}
+,{"stream_name":"stderr","time":23.591336624,"data":"    870         categorical_feature,\n"}
+,{"stream_name":"stderr","time":23.591341009,"data":"\n"}
+,{"stream_name":"stderr","time":23.591345321,"data":"/usr/local/lib/python3.12/dist-packages/lightgbm/basic.py in _pandas_to_numpy(data, target_dtype)\n"}
+,{"stream_name":"stderr","time":23.59134988,"data":"    812     target_dtype: \"np.typing.DTypeLike\",\n"}
+,{"stream_name":"stderr","time":23.591354257,"data":"    813 ) -\u003e np.ndarray:\n"}
+,{"stream_name":"stderr","time":23.591358694,"data":"--\u003e 814     _check_for_bad_pandas_dtypes(data.dtypes)\n"}
+,{"stream_name":"stderr","time":23.591363324,"data":"    815     try:\n"}
+,{"stream_name":"stderr","time":23.591367688,"data":"    816         # most common case (no nullable dtypes)\n"}
+,{"stream_name":"stderr","time":23.59137204,"data":"\n"}
+,{"stream_name":"stderr","time":23.591376154,"data":"/usr/local/lib/python3.12/dist-packages/lightgbm/basic.py in _check_for_bad_pandas_dtypes(pandas_dtypes_series)\n"}
+,{"stream_name":"stderr","time":23.591380831,"data":"    803     ]\n"}
+,{"stream_name":"stderr","time":23.591384922,"data":"    804     if bad_pandas_dtypes:\n"}
+,{"stream_name":"stderr","time":23.591388565,"data":"--\u003e 805         raise ValueError(\n"}
+,{"stream_name":"stderr","time":23.591396834,"data":"    806             f\"pandas dtypes must be int, float or bool.\\nFields with bad pandas dtypes: {', '.join(bad_pandas_dtypes)}\"\n"}
+,{"stream_name":"stderr","time":23.591402575,"data":"    807         )\n"}
+,{"stream_name":"stderr","time":23.591406891,"data":"\n"}
+,{"stream_name":"stderr","time":23.591410997,"data":"ValueError: pandas dtypes must be int, float or bool.\n"}
+,{"stream_name":"stderr","time":23.591415994,"data":"Fields with bad pandas dtypes: Driver: object, Compound: object, Race: object\n"}
+,{"stream_name":"stderr","time":23.591420931000002,"data":"\n"}
+,{"stream_name":"stderr","time":26.459324306,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":26.4593631,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":26.679952783,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":26.6799829,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":27.546365753,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":27.973147033,"data":"[NbConvertApp] Writing 72385 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":31.269155629,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":32.628360514,"data":"[NbConvertApp] Writing 531965 bytes to __results__.html\n"}
+]
