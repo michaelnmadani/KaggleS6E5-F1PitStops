@@ -23,6 +23,17 @@
       "date": "2026-05-09"
     },
     {
+      "id": "005_lgbm_xgb_blend",
+      "cv_auc": 0.9499,
+      "cv_std": 0.0008,
+      "lb_auc": null,
+      "n_features": 27,
+      "model": ["lgbm", "xgb"],
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
+      "note": "50/50 blend; LGBM/XGB too correlated for diversity (+0.0002 only)",
+      "date": "2026-05-09"
+    },
+    {
       "id": "004_target_encode_fix",
       "cv_auc": 0.9497,
       "cv_std": 0.0009,
