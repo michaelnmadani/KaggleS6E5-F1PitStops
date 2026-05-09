@@ -1,13 +1,20 @@
-# Next Iteration: 005_lgbm_xgb_blend
+# Next Iteration: 006_catboost
 
 ## What to change
-Add XGBoost as a second model alongside LGBM. Same feature pipeline as 004 (F1 blocks + target encoding). The pipeline blends the two models' OOF predictions by optimizing weights on the full OOF set. Config uses per-model params dict.
+Switch model to CatBoost with native categorical handling. Remove target_encode_binary and label_encode — CatBoost receives raw string columns (Driver, Compound, Race) directly. Add `class_weights: balanced` to address the persistent 6pp balanced-accuracy gap.
+
+Code change: `_catboost_fit` in models.py now auto-detects object-dtype columns and passes them as `cat_features` via Pool (additive fix, already committed).
 
 ## Why
-Four iterations in, gains are ~+0.0003–0.0006 per experiment. Ensemble diversity is the most reliable next lever: LGBM and XGBoost find different local optima (different gradient computation, regularization, split finding). Blending them typically gives +0.001–0.003 AUC with zero feature-engineering risk.
+Five iterations of LGBM/XGB gave cumulative +0.0013 AUC. Both GBM families find similar boundaries on the same features. CatBoost uses:
+- **Ordered boosting** — unbiased gradient estimates, different residuals
+- **Native categoricals** — symmetric tree splits on raw Driver/Compound/Race without target-encoding leakage
+- **Balanced class weights** — directly increases recall on minority pit-stop events
+
+Expected to break the current ceiling by exploiting categorical interaction patterns that smoothed mean encoding obscures.
 
 ## Expected delta in CV AUC
-+0.001 to +0.003 (from 0.9497 → ~0.951–0.953).
++0.002 to +0.005 (from 0.9499 → ~0.952–0.955).
 
 ## Risk
-Low. Multi-model blending is already implemented and tested in train.py. XGBoost is already in FITTERS. The config schema supports `model: [lgbm, xgb]`. Only risk: XGB training adds ~3–5 min to elapsed time.
+Medium. CatBoost is slower than LGBM (may hit 9h Kaggle timeout with 3000 iterations if queue is slow — reduce to 2000 if needed). The models.py fix is small and isolated. If CatBoost underperforms, iter 007 falls back to LGBM with rolling features.

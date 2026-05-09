@@ -22,6 +22,12 @@ Maintained by reviewer sessions. Strategist picks one idea per session and moves
 - [ ] **iter 014** — Deeper hyperparameter search: increase num_leaves to 127, reduce learning_rate to 0.02, increase num_boost_round to 5000.
 - [ ] **iter 015** — TabPFN bagged subsample ensemble (tabpfn_bagged). Orthogonal decision boundary; useful for small effective-n subproblems like specific circuit strategies.
 
+## From review of iter 005_lgbm_xgb_blend (CV AUC 0.9499)
+
+- [ ] **idea-r005-a** — CatBoost with native categoricals + balanced class weights. Two changes: different algorithm family (ordered boosting), and class imbalance fix. Expected +0.002–0.005 AUC.
+- [ ] **idea-r005-b** — Race-group rolling features: per-driver lap-time trend (last 3 laps), stint degradation rate. New `f1_race_rolling` block with groupby. Expected +0.003–0.008 AUC.
+- [ ] **idea-r005-c** — Multi-seed LGBM (seeds 42, 123, 456) using `model: [lgbm, lgbm_rf]` with different seed params. Pure variance reduction. Expected +0.0005–0.001 AUC.
+
 ## From review of iter 004_target_encode_fix (CV AUC 0.9497)
 
 - [ ] **idea-r004-a** — LGBM + XGBoost blend. Ensemble diversity from two GBM implementations; config already supports `model: [lgbm, xgb]`. Expected +0.001–0.003 AUC.
