@@ -1,0 +1,38 @@
+
+# Iteration 006 — CatBoost with native categorical handling + balanced class weights.
+# Does NOT use target_encode_binary or label_encode — CatBoost handles raw string
+# columns (Driver, Compound, Race) natively via ordered boosting on cat_features.
+# class_weights: balanced addresses the persistent recall gap on pit events.
+# Expected: +0.002–0.005 AUC over 005.
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+
+model: catboost
+
+class_weights: balanced
+
+params:
+  iterations: 3000
+  early_stopping_rounds: 100
+  learning_rate: 0.03
+  depth: 8
+  l2_leaf_reg: 3.0
+  random_seed: 42
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
