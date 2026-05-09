@@ -81,6 +81,11 @@ def target_encode_binary(
         smooth_dict = smooth.to_dict()
         X_tr[f"{col}_te"] = np.asarray(src_tr.map(smooth_dict).astype(float).fillna(global_mean))
         X_te[f"{col}_te"] = np.asarray(src_te.map(smooth_dict).astype(float).fillna(global_mean))
+    # Drop original object columns — LightGBM cannot accept object dtype.
+    # Low-cardinality integer columns are kept (already numeric).
+    obj_encoded = [c for c in cat_like if X_tr[c].dtype == object]
+    X_tr = X_tr.drop(columns=obj_encoded)
+    X_te = X_te.drop(columns=obj_encoded)
     return X_tr, X_te
 
 
