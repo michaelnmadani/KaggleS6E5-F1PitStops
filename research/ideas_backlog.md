@@ -22,6 +22,12 @@ Maintained by reviewer sessions. Strategist picks one idea per session and moves
 - [ ] **iter 014** — Deeper hyperparameter search: increase num_leaves to 127, reduce learning_rate to 0.02, increase num_boost_round to 5000.
 - [ ] **iter 015** — TabPFN bagged subsample ensemble (tabpfn_bagged). Orthogonal decision boundary; useful for small effective-n subproblems like specific circuit strategies.
 
+## From review of iter 001_baseline (CV AUC 0.9486)
+
+- [ ] **idea-r001-a** — Add all 4 F1 feature blocks at once (tyre+gap+stint+position). Pre-built, zero risk, expected +0.004–0.008 AUC. Addresses tyre degradation cliff and undercut gap signal.
+- [ ] **idea-r001-b** — Per-fold target encoding of Driver/Team/Circuit/TyreCompound. Direct smoothed P(pit|category) encoding captures team strategy fingerprints without CV leakage.
+- [ ] **idea-r001-c** — Race-group cross-validation: split folds by RaceId. Current random stratified CV is optimistic (same race in train+val). Grouped CV gives honest generalization estimate.
+
 ## Rules
 
 - Append new ideas at the bottom with `- [ ]`.

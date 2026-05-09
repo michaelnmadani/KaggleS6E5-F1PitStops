@@ -1,1 +1,17 @@
-{}
+{
+  "iterations": [
+    {
+      "id": "001_baseline",
+      "cv_auc": 0.9486,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 15,
+      "model": "lgbm",
+      "features": ["fill_na_median", "label_encode"],
+      "note": "LightGBM baseline, no F1 feature engineering",
+      "date": "2026-05-09"
+    }
+  ],
+  "best_cv": "001_baseline",
+  "target_top5pct_auc": 0.965
+}
