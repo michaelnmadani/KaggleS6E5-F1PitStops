@@ -1,7 +1,7 @@
 {
-  "iteration": "001_baseline",
-  "cv_auc": 0.9486,
-  "cv_std": 0.0007,
+  "iteration": "002_f1_features",
+  "cv_auc": 0.9491,
+  "cv_std": 0.0008,
   "lb_auc": null,
-  "submission_file": "iterations/001_baseline/kernel_output/submission.csv"
+  "submission_file": "iterations/002_f1_features/kernel_output/submission.csv"
 }

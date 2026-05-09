@@ -22,6 +22,12 @@ Maintained by reviewer sessions. Strategist picks one idea per session and moves
 - [ ] **iter 014** — Deeper hyperparameter search: increase num_leaves to 127, reduce learning_rate to 0.02, increase num_boost_round to 5000.
 - [ ] **iter 015** — TabPFN bagged subsample ensemble (tabpfn_bagged). Orthogonal decision boundary; useful for small effective-n subproblems like specific circuit strategies.
 
+## From review of iter 002_f1_features (CV AUC 0.9491)
+
+- [ ] **idea-r002-a** — Per-fold target encoding of Driver/Team/Circuit/TyreCompound. F1 feature blocks gave only +0.0005; label-encoded categoricals are the main bottleneck. Smoothed P(pit|category) directly models team strategy fingerprints. Expected +0.003–0.006 AUC.
+- [ ] **idea-r002-b** — Tune LGBM: num_leaves=127, learning_rate=0.02, num_boost_round=5000. Large n_train (439k) can support deeper trees; model may be underfit. Expected +0.002–0.004 AUC.
+- [ ] **idea-r002-c** — Blend LGBM + XGBoost 50/50. Ensemble diversity from two GBM implementations. Expected +0.001–0.003 AUC.
+
 ## From review of iter 001_baseline (CV AUC 0.9486)
 
 - [ ] **idea-r001-a** — Add all 4 F1 feature blocks at once (tyre+gap+stint+position). Pre-built, zero risk, expected +0.004–0.008 AUC. Addresses tyre degradation cliff and undercut gap signal.
