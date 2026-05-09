@@ -1,1 +1,7 @@
-{}
+{
+  "iteration": "004_target_encode_fix",
+  "cv_auc": 0.9497,
+  "cv_std": 0.0009,
+  "lb_auc": null,
+  "submission_file": "iterations/004_target_encode_fix/kernel_output/submission.csv"
+}

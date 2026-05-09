@@ -1,0 +1,11 @@
+config: /kaggle/working/iteration_config.yaml
+train=(439140, 15)  test=(188165, 15)  external_rows=0
+global features: ['fill_na_median', 'f1_tyre_features', 'f1_gap_features', 'f1_stint_features', 'f1_position_features'] -> 22 cols
+per-fold features: ['target_encode_binary']
+fold 0 lgbm: auc=0.95085
+fold 1 lgbm: auc=0.94849
+fold 2 lgbm: auc=0.94996
+fold 3 lgbm: auc=0.94905
+fold 4 lgbm: auc=0.95041
+model lgbm: CV auc=0.94975
+CV auc=0.94975  plain_acc=0.89974  balanced_acc=0.83883

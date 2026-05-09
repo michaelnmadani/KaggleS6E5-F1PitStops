@@ -1,0 +1,52 @@
+
+# Iteration 005 — LGBM + XGBoost blend.
+# Same feature pipeline as 004 (F1 blocks + target encoding + tuned LGBM).
+# Adds XGBoost as second model; blended 50/50 by default.
+# Expected: +0.001–0.003 AUC from ensemble diversity.
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - target_encode_binary
+
+model:
+  - lgbm
+  - xgb
+
+params:
+  lgbm:
+    num_boost_round: 3000
+    early_stopping_rounds: 100
+    learning_rate: 0.03
+    num_leaves: 127
+    min_data_in_leaf: 50
+    feature_fraction: 0.9
+    bagging_fraction: 0.9
+    bagging_freq: 5
+    lambda_l2: 1.0
+  xgb:
+    num_boost_round: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    max_depth: 7
+    min_child_weight: 50
+    subsample: 0.9
+    colsample_bytree: 0.9
+    reg_lambda: 1.0
+    tree_method: hist
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false

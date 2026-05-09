@@ -70,22 +70,27 @@ def _xgb_fit(X_tr, y_tr, X_val, y_val, X_test, params, task, sample_weight=None)
 
 
 def _catboost_fit(X_tr, y_tr, X_val, y_val, X_test, params, task, sample_weight=None) -> FitResult:
-    from catboost import CatBoostClassifier, CatBoostRegressor
+    from catboost import CatBoostClassifier, CatBoostRegressor, Pool
 
     base = {"verbose": 0, "random_seed": 42, "iterations": 2000, "early_stopping_rounds": 100}
     base.update(params)
+    cat_cols = [i for i, c in enumerate(X_tr.columns) if X_tr[c].dtype == object]
+    kw = {"cat_features": cat_cols} if cat_cols else {}
     cls = CatBoostClassifier if task in ("binary", "multiclass") else CatBoostRegressor
     model = cls(**base)
-    model.fit(X_tr, y_tr, eval_set=(X_val, y_val), sample_weight=sample_weight)
+    model.fit(
+        Pool(X_tr, y_tr, weight=sample_weight, **kw),
+        eval_set=Pool(X_val, y_val, **kw),
+    )
     if task == "binary":
-        val_pred = model.predict_proba(X_val)[:, 1]
-        test_pred = model.predict_proba(X_test)[:, 1]
+        val_pred = model.predict_proba(Pool(X_val, **kw))[:, 1]
+        test_pred = model.predict_proba(Pool(X_test, **kw))[:, 1]
     elif task == "multiclass":
-        val_pred = model.predict_proba(X_val)
-        test_pred = model.predict_proba(X_test)
+        val_pred = model.predict_proba(Pool(X_val, **kw))
+        test_pred = model.predict_proba(Pool(X_test, **kw))
     else:
-        val_pred = model.predict(X_val)
-        test_pred = model.predict(X_test)
+        val_pred = model.predict(Pool(X_val, **kw))
+        test_pred = model.predict(Pool(X_test, **kw))
     return FitResult(model=model, val_pred=val_pred, test_pred=test_pred)
 
 

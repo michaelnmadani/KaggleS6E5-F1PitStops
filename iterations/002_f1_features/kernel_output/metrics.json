@@ -1,0 +1,27 @@
+{
+  "cv_score": 0.9491157532281407,
+  "metric": "auc",
+  "plain_accuracy": 0.8993191237418591,
+  "balanced_accuracy": 0.8380332649487264,
+  "fold_scores": [
+    0.9500885881952472,
+    0.9480070271686938,
+    0.9493427010176156,
+    0.9485273596635443,
+    0.9496352974582692
+  ],
+  "fold_mean": 0.949120194700674,
+  "fold_std": 0.0007540850360266279,
+  "elapsed_sec": 239.9,
+  "model": "lgbm",
+  "per_model_cv": {
+    "lgbm": 0.9491157532281407
+  },
+  "blend_weights": {
+    "lgbm": 1.0
+  },
+  "postprocess": null,
+  "n_features": 22,
+  "n_train": 439140,
+  "n_test": 188165
+}

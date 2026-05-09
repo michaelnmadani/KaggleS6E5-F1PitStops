@@ -1,0 +1,10 @@
+config: /kaggle/working/iteration_config.yaml
+train=(439140, 15)  test=(188165, 15)  external_rows=0
+global features: ['fill_na_median', 'label_encode'] -> 15 cols
+fold 0 lgbm: auc=0.94954
+fold 1 lgbm: auc=0.94787
+fold 2 lgbm: auc=0.94878
+fold 3 lgbm: auc=0.94768
+fold 4 lgbm: auc=0.94917
+model lgbm: CV auc=0.94860
+CV auc=0.94860  plain_acc=0.89897  balanced_acc=0.83533
