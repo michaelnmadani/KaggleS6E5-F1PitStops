@@ -22,6 +22,12 @@ Maintained by reviewer sessions. Strategist picks one idea per session and moves
 - [ ] **iter 014** — Deeper hyperparameter search: increase num_leaves to 127, reduce learning_rate to 0.02, increase num_boost_round to 5000.
 - [ ] **iter 015** — TabPFN bagged subsample ensemble (tabpfn_bagged). Orthogonal decision boundary; useful for small effective-n subproblems like specific circuit strategies.
 
+## From review of iter 004_target_encode_fix (CV AUC 0.9497)
+
+- [ ] **idea-r004-a** — LGBM + XGBoost blend. Ensemble diversity from two GBM implementations; config already supports `model: [lgbm, xgb]`. Expected +0.001–0.003 AUC.
+- [ ] **idea-r004-b** — Class-weighted training (`class_weights: balanced`). Balanced accuracy still 6.1pp below plain accuracy; oversampling minority class may recover recall. Expected +0.0005–0.002 on AUC.
+- [ ] **idea-r004-c** — Submit iter 004 to Kaggle LB to calibrate CV-vs-LB gap and understand real distance to top 5%.
+
 ## From review of iter 002_f1_features (CV AUC 0.9491)
 
 - [ ] **idea-r002-a** — Per-fold target encoding of Driver/Team/Circuit/TyreCompound. F1 feature blocks gave only +0.0005; label-encoded categoricals are the main bottleneck. Smoothed P(pit|category) directly models team strategy fingerprints. Expected +0.003–0.006 AUC.

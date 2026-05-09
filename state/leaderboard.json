@@ -12,6 +12,28 @@
       "date": "2026-05-09"
     },
     {
+      "id": "003_target_encode",
+      "cv_auc": null,
+      "cv_std": null,
+      "lb_auc": null,
+      "n_features": null,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
+      "note": "CRASHED — object dtype bug in target_encode_binary",
+      "date": "2026-05-09"
+    },
+    {
+      "id": "004_target_encode_fix",
+      "cv_auc": 0.9497,
+      "cv_std": 0.0009,
+      "lb_auc": null,
+      "n_features": 27,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
+      "note": "Fixed target_encode_binary + num_leaves=127; new best CV",
+      "date": "2026-05-09"
+    },
+    {
       "id": "002_f1_features",
       "cv_auc": 0.9491,
       "cv_std": 0.0008,
@@ -23,6 +45,6 @@
       "date": "2026-05-09"
     }
   ],
-  "best_cv": "002_f1_features",
+  "best_cv": "004_target_encode_fix",
   "target_top5pct_auc": 0.965
 }
