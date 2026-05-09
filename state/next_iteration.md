@@ -1,22 +1,23 @@
-# Next Iteration: 002_f1_features
+# Next Iteration: 003_target_encode
 
 ## What to change
-Add all four F1-domain feature blocks to the pipeline:
-- `f1_tyre_features`: tyre_life_sq, tyre_life_log1p, tyre_life_pct_lap
-- `f1_gap_features`: gap_abs, gap_log1p for all gap columns
-- `f1_stint_features`: stint_sq, past_half_stint, stint_frac
-- `f1_position_features`: position_inv, lap_pct
+Replace `label_encode` with `target_encode_binary` for categorical columns, keeping all F1 feature blocks. Also tune LGBM hyperparameters to exploit the larger tree capacity:
+- num_leaves: 63 → 127
+- learning_rate: 0.05 → 0.03
+- num_boost_round: 2000 → 3000
 
-Feature list in config: `[fill_na_median, f1_tyre_features, f1_gap_features, f1_stint_features, f1_position_features, label_encode]`
+Feature list: `[fill_na_median, f1_tyre_features, f1_gap_features, f1_stint_features, f1_position_features, target_encode_binary]`
 
-Keep all other params identical to 001_baseline (same LGBM hparams, 5-fold stratified CV, seed 42).
+Note: `label_encode` is removed because `target_encode_binary` handles categoricals via smoothed mean encoding. Numeric columns are still covered by `fill_na_median`.
 
 ## Why
-The baseline only uses 15 raw features with no domain engineering. Tyre age is the primary strategic signal for pit decisions — polynomial/log transforms expose the degradation cliff. Gap to next car is the undercut/overcut signal. Stint fraction encodes urgency. All four blocks are pre-built and tested; this is zero new code risk.
+Iter 002 showed that F1 geometric features gave only +0.0005 lift — LGBM already handles non-linearity internally. The remaining gap is in categorical representation. Driver/Team/Circuit/TyreCompound encoded as smoothed P(pit|category) captures team-specific pit window timing directly. This is per-fold (applied inside CV) so there is no target leakage.
+
+Combining with mild LGBM tuning (deeper trees, slower LR) to exploit the 439k training rows, which can support num_leaves=127 without overfitting.
 
 ## Expected delta in CV AUC
-+0.004 to +0.008 (from 0.9486 → ~0.952–0.957).
-Reasoning: tyre features alone typically give the biggest lift in pit-stop prediction tasks; the other three add incremental signal.
++0.004 to +0.008 (from 0.9491 → ~0.953–0.957).
+Target encoding is consistently the highest-impact categorical feature in GBM pit-stop prediction tasks.
 
 ## Risk
-Low. All blocks are additive, use column-name heuristics, and are no-ops if the expected column is missing. The same LGBM hparams are retained so any regression is attributable purely to the features.
+Low-medium. `target_encode_binary` is pre-built and per-fold safe. LGBM tuning is conservative (3000 rounds with early stopping at 100 still terminates early). Combined change makes attribution harder if score drops — but both changes are well-motivated and the config is easy to revert.
