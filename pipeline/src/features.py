@@ -125,8 +125,10 @@ def f1_gap_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFram
 def f1_stint_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """F1-specific: stint fraction and polynomial features."""
     X_tr, X_te = X_tr.copy(), X_te.copy()
+    # Also matches TyreLife / tyre_life (exact name, not derived tyre_life_sq etc.)
     stint_col = next(
-        (c for c in X_tr.columns if any(k in c.lower() for k in ("stint", "lapsontyre", "tyreage", "tyre_age"))),
+        (c for c in X_tr.columns if any(k in c.lower() for k in ("stint", "lapsontyre", "tyreage", "tyre_age"))
+         or c.lower() in ("tyrelife", "tyre_life")),
         None,
     )
     compound_col = next((c for c in X_tr.columns if "compound" in c.lower()), None)
@@ -163,50 +165,28 @@ def f1_position_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.Dat
 def f1_race_rolling(
     X_tr: pd.DataFrame, X_te: pd.DataFrame, y_tr=None
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Per-fold rolling lap-time features within each (Race, Driver) group.
-
-    Training rows: sorted by LapNumber, shift(1).rolling(3) to avoid leakage.
-    Val/test rows: per-(Race, Driver) training aggregates as a proxy.
-    Adds: rolling_lt3, laptime_d1 (lap-to-lap delta), lt_vs_dr_mean.
-    No-op if LapTime / LapNumber / Driver / Race columns are absent."""
+    """Per-fold rolling lap-time features within each (Race, Driver) group."""
     X_tr, X_te = X_tr.copy(), X_te.copy()
-
-    lap_col = next(
-        (c for c in X_tr.columns if c.lower() in ("lapnumber", "lap_number")), None
-    )
-    time_col = next(
-        (c for c in X_tr.columns if "laptime" in c.lower() or c.lower() == "lap_time"), None
-    )
+    lap_col = next((c for c in X_tr.columns if c.lower() in ("lapnumber", "lap_number")), None)
+    time_col = next((c for c in X_tr.columns if "laptime" in c.lower() or c.lower() == "lap_time"), None)
     driver_col = next((c for c in X_tr.columns if c.lower() == "driver"), None)
     race_col = next((c for c in X_tr.columns if c.lower() == "race"), None)
-
     if not all([lap_col, time_col, driver_col, race_col]):
         return X_tr, X_te
-
     grp = [race_col, driver_col]
-
     tr = X_tr.reset_index(drop=True)
     order = tr.sort_values(grp + [lap_col]).index
     ts = tr.loc[order].copy()
     g = ts.groupby(grp, sort=False)
-    ts["rolling_lt3"] = g[time_col].transform(
-        lambda x: x.shift(1).rolling(3, min_periods=1).mean()
-    )
+    ts["rolling_lt3"] = g[time_col].transform(lambda x: x.shift(1).rolling(3, min_periods=1).mean())
     ts["laptime_d1"] = g[time_col].transform("diff")
     ts_back = ts.iloc[np.argsort(np.argsort(order))]
     X_tr["rolling_lt3"] = ts_back["rolling_lt3"].values
     X_tr["laptime_d1"] = ts_back["laptime_d1"].values
-
-    agg = (
-        X_tr.groupby(grp, observed=True)
-        .agg(_lt_mean=(time_col, "mean"), _roll_proxy=("rolling_lt3", "mean"))
-        .reset_index()
-    )
-
+    agg = X_tr.groupby(grp, observed=True).agg(_lt_mean=(time_col, "mean"), _roll_proxy=("rolling_lt3", "mean")).reset_index()
     X_tr = X_tr.merge(agg[grp + ["_lt_mean"]], on=grp, how="left")
     X_tr["lt_vs_dr_mean"] = X_tr[time_col] - X_tr["_lt_mean"]
     X_tr.drop(columns=["_lt_mean"], inplace=True)
-
     X_te = X_te.merge(agg, on=grp, how="left")
     global_roll = float(X_tr["rolling_lt3"].median())
     global_lt = float(X_tr[time_col].median())
@@ -214,24 +194,16 @@ def f1_race_rolling(
     X_te["laptime_d1"] = 0.0
     X_te["lt_vs_dr_mean"] = X_te[time_col] - X_te["_lt_mean"].fillna(global_lt)
     X_te.drop(columns=["_lt_mean", "_roll_proxy"], inplace=True, errors="ignore")
-
     for col in ("rolling_lt3", "laptime_d1", "lt_vs_dr_mean"):
         fill = float(X_tr[col].median())
         X_tr[col] = X_tr[col].fillna(fill)
         X_te[col] = X_te[col].fillna(fill)
-
     return X_tr, X_te
 
 
 def f1_feature_crosses(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Pairwise interaction features for key F1 signals.
-
-    Multiplies column pairs that are physically meaningful for pit timing:
-    tyre age x gap, stint fraction x position, tyre age x stint fraction.
-    All inputs must already exist (run after tyre/gap/stint/position blocks).
-    No-op for any pair where a column is missing."""
+    """Pairwise interaction features for key F1 signals."""
     X_tr, X_te = X_tr.copy(), X_te.copy()
-
     tyre_col = next(
         (c for c in X_tr.columns if "tyre" in c.lower() and any(k in c.lower() for k in ("life", "age", "lap"))
          and "sq" not in c.lower() and "log" not in c.lower() and "pct" not in c.lower()),
@@ -242,10 +214,7 @@ def f1_feature_crosses(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataF
         None,
     )
     stint_frac_col = "stint_frac" if "stint_frac" in X_tr.columns else None
-    position_col = next(
-        (c for c in X_tr.columns if c.lower() in ("position", "raceposition", "race_position")), None
-    )
-
+    position_col = next((c for c in X_tr.columns if c.lower() in ("position", "raceposition", "race_position")), None)
     pairs = [
         (tyre_col, gap_col, "tyre_x_gap"),
         (tyre_col, stint_frac_col, "tyre_x_stintfrac"),
