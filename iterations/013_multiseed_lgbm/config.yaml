@@ -1,0 +1,94 @@
+# Iteration 013 -- 5-seed LGBM ensemble.
+# Pure variance reduction: 5 identical LGBM models with different random seeds.
+# Same best feature set as iter 010 (working stint features + all 4 crosses).
+# Same hyperparams as iter 005/010 (num_leaves=127, lr=0.05).
+# Each seed produces different subsampling/leaf assignment → uncorrelated errors.
+# Blended equally (score-optimized 5-way average).
+# No new features, no new model families -- isolates seed diversity effect.
+# Expected: +0.001-0.002 AUC over 0.9499 (reduce fold variance from 0.0007 toward 0.0003).
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - f1_feature_crosses
+  - target_encode_binary
+
+model:
+  - lgbm
+  - lgbm_rf
+  - lgbm_b
+  - lgbm_c
+  - lgbm_d
+
+params:
+  lgbm:
+    num_leaves: 127
+    n_estimators: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    seed: 42
+  lgbm_rf:
+    num_leaves: 127
+    n_estimators: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    seed: 123
+  lgbm_b:
+    num_leaves: 127
+    n_estimators: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    seed: 456
+  lgbm_c:
+    num_leaves: 127
+    n_estimators: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    seed: 789
+  lgbm_d:
+    num_leaves: 127
+    n_estimators: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    seed: 2024
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false

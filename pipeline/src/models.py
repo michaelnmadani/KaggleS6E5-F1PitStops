@@ -175,6 +175,10 @@ def _logreg_fit(X_tr, y_tr, X_val, y_val, X_test, params, task, sample_weight=No
 FITTERS = {
     "lgbm": _lgbm_fit,
     "lgbm_rf": _lgbm_fit,
+    "lgbm_b": _lgbm_fit,
+    "lgbm_c": _lgbm_fit,
+    "lgbm_d": _lgbm_fit,
+    "lgbm_e": _lgbm_fit,
     "xgb": _xgb_fit,
     "xgb_a": _xgb_fit,
     "xgb_b": _xgb_fit,
