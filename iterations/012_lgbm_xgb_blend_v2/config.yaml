@@ -1,0 +1,55 @@
+# Iteration 012 -- LGBM + XGB blend with full working feature set.
+# Iter 005 blended LGBM+XGB without working stint features → 0.9499 (best CV).
+# Iter 010 fixed stint features (stint_frac, past_half_stint, stint_sq) + all 4 crosses → 0.9495 solo LGBM.
+# This run combines: the blend architecture of iter 005 + the corrected feature set of iter 010.
+# No compound×driver cross (iter 011 showed it hurts).
+# LGBM/XGB params same as iter 005 (proven best single-model configs).
+# Expected: 0.9500-0.9503 AUC from blend diversity on richer features.
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - f1_feature_crosses
+  - target_encode_binary
+
+model:
+  - lgbm
+  - xgb
+
+params:
+  lgbm:
+    num_boost_round: 3000
+    early_stopping_rounds: 100
+    learning_rate: 0.03
+    num_leaves: 127
+    min_data_in_leaf: 50
+    feature_fraction: 0.9
+    bagging_fraction: 0.9
+    bagging_freq: 5
+    lambda_l2: 1.0
+  xgb:
+    num_boost_round: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    max_depth: 7
+    min_child_weight: 50
+    subsample: 0.9
+    colsample_bytree: 0.9
+    reg_lambda: 1.0
+    tree_method: hist
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false

@@ -109,6 +109,17 @@
       "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
       "note": "Stint features working for first time; deeper num_leaves=255; -0.0004 vs best; feature set is bottleneck",
       "date": "2026-05-10"
+    },
+    {
+      "id": "011_compound_driver_te",
+      "cv_auc": 0.9492,
+      "cv_std": 0.0008,
+      "lb_auc": null,
+      "n_features": 31,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_compound_driver_cross", "f1_feature_crosses", "target_encode_binary"],
+      "note": "Compound×Driver/Race interaction TE hurts (-0.0003 vs 010); high-cardinality noise > signal",
+      "date": "2026-05-10"
     }
   ],
   "best_cv": "005_lgbm_xgb_blend",
@@ -117,9 +128,10 @@
   "key_findings": {
     "class_weights_balanced_auc_cost": -0.0017,
     "catboost_native_cats_advantage": "+0.0007 AUC vs target-encoded",
-    "lgbm_xgb_blend_diversity": "insufficient",
+    "lgbm_xgb_blend_diversity": "+0.0002 from iter 005 blend",
     "lgbm_catboost_blend_diversity": "insufficient with shared target-encoded features",
     "stint_features_were_broken": "iters 001-009 produced no stint_frac/past_half_stint/stint_sq",
-    "feature_set_bottleneck": "plateau at 0.9479-0.9499; need interaction features like compound x driver"
+    "feature_set_bottleneck": "plateau at 0.9479-0.9499; interaction features like compound x driver add noise not signal",
+    "high_cardinality_te_risk": "compound x driver/race has 100-125 categories; sparse categories get shrunk to noise"
   }
 }
