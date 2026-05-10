@@ -1,0 +1,45 @@
+
+# Iteration 008 -- Rolling lap-time features (new f1_race_rolling block).
+# Adds 3 new per-fold features from sorted (Race, Driver, LapNumber) sequences:
+#   rolling_lt3    : rolling mean of last 3 lap times (shift to avoid leakage)
+#   laptime_d1     : lap-to-lap time delta (pace degradation signal)
+#   lt_vs_dr_mean  : deviation from per-driver-race mean (anomaly signal)
+# Uses LGBM (best single model, fast) so the new feature signal is isolated.
+# Expected: +0.003--0.008 AUC -- rolling pace trend is the key missing signal.
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - f1_race_rolling
+  - target_encode_binary
+
+model: lgbm
+
+class_weights: balanced
+
+params:
+  num_leaves: 127
+  n_estimators: 2000
+  early_stopping_rounds: 100
+  learning_rate: 0.05
+  min_child_samples: 20
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
