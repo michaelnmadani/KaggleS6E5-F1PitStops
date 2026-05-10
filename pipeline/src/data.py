@@ -12,19 +12,28 @@ from sklearn.model_selection import KFold, StratifiedKFold
 def _find_extra_file(extra_dataset: dict) -> Path:
     """Resolve the extra dataset file path. Tries explicit mount_dir first,
     then globs under /kaggle/input/ recursively (Kaggle uses both flat and
-    namespaced mount structures, e.g. /kaggle/input/datasets/<owner>/<name>/)."""
+    namespaced mount structures, e.g. /kaggle/input/datasets/<owner>/<name>/).
+    Falls back to auto-discovering any CSV in mount_dir if the filename is wrong."""
     file_name = extra_dataset["file"]
     if extra_dataset.get("mount_dir"):
         p = Path(extra_dataset["mount_dir"]) / file_name
         if p.is_file():
             return p
     candidates = glob.glob(f"/kaggle/input/**/{file_name}", recursive=True)
-    if not candidates:
-        raise FileNotFoundError(
-            f"extra_dataset file {file_name!r} not found under /kaggle/input; "
-            f"tried mount_dir={extra_dataset.get('mount_dir')}"
-        )
-    return Path(candidates[0])
+    if candidates:
+        return Path(candidates[0])
+    # Auto-discover: try any CSV in mount_dir (filename guess may be wrong)
+    if extra_dataset.get("mount_dir"):
+        fallback = sorted(glob.glob(f"{extra_dataset['mount_dir']}/**/*.csv", recursive=True))
+        if fallback:
+            print(f"extra_dataset: {file_name!r} not found; auto-discovered {fallback[0]}")
+            return Path(fallback[0])
+    all_csvs = sorted(glob.glob("/kaggle/input/**/*.csv", recursive=True))
+    raise FileNotFoundError(
+        f"extra_dataset file {file_name!r} not found under /kaggle/input; "
+        f"tried mount_dir={extra_dataset.get('mount_dir')}; "
+        f"available CSVs under /kaggle/input: {all_csvs[:20]}"
+    )
 
 
 def load(input_dir: Path, target: str, id_col: str, extra_dataset: dict | None = None):

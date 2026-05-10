@@ -12,6 +12,17 @@
       "date": "2026-05-09"
     },
     {
+      "id": "002_f1_features",
+      "cv_auc": 0.9491,
+      "cv_std": 0.0008,
+      "lb_auc": null,
+      "n_features": 22,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "label_encode"],
+      "note": "F1 domain feature blocks; small +0.0005 lift",
+      "date": "2026-05-09"
+    },
+    {
       "id": "003_target_encode",
       "cv_auc": null,
       "cv_std": null,
@@ -23,17 +34,6 @@
       "date": "2026-05-09"
     },
     {
-      "id": "005_lgbm_xgb_blend",
-      "cv_auc": 0.9499,
-      "cv_std": 0.0008,
-      "lb_auc": null,
-      "n_features": 27,
-      "model": ["lgbm", "xgb"],
-      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
-      "note": "50/50 blend; LGBM/XGB too correlated for diversity (+0.0002 only)",
-      "date": "2026-05-09"
-    },
-    {
       "id": "004_target_encode_fix",
       "cv_auc": 0.9497,
       "cv_std": 0.0009,
@@ -41,21 +41,131 @@
       "n_features": 27,
       "model": "lgbm",
       "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
-      "note": "Fixed target_encode_binary + num_leaves=127; new best CV",
+      "note": "Fixed target_encode_binary + num_leaves=127",
       "date": "2026-05-09"
     },
     {
-      "id": "002_f1_features",
-      "cv_auc": 0.9491,
+      "id": "005_lgbm_xgb_blend",
+      "cv_auc": 0.9499,
       "cv_std": 0.0008,
       "lb_auc": null,
-      "n_features": 22,
-      "model": "lgbm",
-      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "label_encode"],
-      "note": "F1 domain feature blocks; small +0.0005 lift; categoricals still label-encoded",
+      "n_features": 27,
+      "model": ["lgbm", "xgb"],
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
+      "note": "50/50 blend; BEST CV 0.9499",
       "date": "2026-05-09"
+    },
+    {
+      "id": "006_catboost",
+      "cv_auc": 0.9496,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 22,
+      "model": "catboost",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features"],
+      "note": "CatBoost native cats + balanced weights; balanced_acc 0.886 (+4.6pp)",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "007_lgbm_catboost_blend",
+      "cv_auc": 0.9494,
+      "cv_std": 0.0009,
+      "lb_auc": null,
+      "n_features": 27,
+      "model": ["lgbm", "catboost"],
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
+      "note": "class_weights=balanced HURTS AUC (-0.0017 vs 005 LGBM); blend -0.0005 vs best",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "008_rolling_features",
+      "cv_auc": 0.9479,
+      "cv_std": 0.0009,
+      "lb_auc": null,
+      "n_features": 30,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_race_rolling", "target_encode_binary"],
+      "note": "Rolling lap-time features neutral; random folds destroy temporal order; class_weights still present",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "009_feature_crosses",
+      "cv_auc": 0.9492,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 29,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
+      "note": "Only 2/4 crosses created — stint_frac missing due to TyreLife detection bug; no class_weights",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "010_stint_fix",
+      "cv_auc": 0.9495,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 29,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
+      "note": "Stint features working for first time; deeper num_leaves=255; -0.0004 vs best; feature set is bottleneck",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "011_compound_driver_te",
+      "cv_auc": 0.9492,
+      "cv_std": 0.0008,
+      "lb_auc": null,
+      "n_features": 31,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_compound_driver_cross", "f1_feature_crosses", "target_encode_binary"],
+      "note": "Compound×Driver/Race interaction TE hurts (-0.0003 vs 010); high-cardinality noise > signal",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "012_lgbm_xgb_blend_v2",
+      "cv_auc": 0.9499,
+      "cv_std": 0.0008,
+      "lb_auc": null,
+      "n_features": 29,
+      "model": ["lgbm", "xgb"],
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
+      "note": "Tied best (0.9499); LGBM solo 0.9496, XGB 0.9492; feature set saturated — plateau confirmed",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "013_multiseed_lgbm",
+      "cv_auc": 0.9498,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 29,
+      "model": ["lgbm", "lgbm_rf", "lgbm_b", "lgbm_c", "lgbm_d"],
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
+      "note": "5-seed LGBM: all seeds give 0.9492-0.9493, blend 0.9498 — LGBM has zero seed variance; bias-limited not variance-limited",
+      "date": "2026-05-10"
+    },
+    {
+      "id": "014_external_dataset",
+      "cv_auc": null,
+      "cv_std": null,
+      "lb_auc": null,
+      "n_features": null,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
+      "note": "CRASHED — missing slug field (dataset not mounted) + wrong filename with no fallback",
+      "date": "2026-05-10"
     }
   ],
-  "best_cv": "004_target_encode_fix",
-  "target_top5pct_auc": 0.965
+  "best_cv": "005_lgbm_xgb_blend",
+  "target_top5pct_auc": 0.965,
+  "target_top1pct_auc": 0.970,
+  "key_findings": {
+    "class_weights_balanced_auc_cost": -0.0017,
+    "catboost_native_cats_advantage": "+0.0007 AUC vs target-encoded",
+    "lgbm_xgb_blend_diversity": "+0.0002 from iter 005 blend",
+    "lgbm_catboost_blend_diversity": "insufficient with shared target-encoded features",
+    "stint_features_were_broken": "iters 001-009 produced no stint_frac/past_half_stint/stint_sq",
+    "feature_set_bottleneck": "13 iters plateau at 0.9479-0.9499; model is bias-limited on 439K synthetic rows",
+    "lgbm_seed_variance": "near-zero; 5 seeds all give 0.9492-0.9493; not variance-limited",
+    "high_cardinality_te_risk": "compound x driver/race has 100-125 categories; sparse categories shrunk to noise"
+  }
 }

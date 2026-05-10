@@ -1,0 +1,47 @@
+# Iteration 015 -- External F1 dataset, fixed. Re-run of crashed iter 014.
+# Fix 1: Added slug field so build_notebook.py mounts dataset in kernel-metadata.json.
+# Fix 2: data.py _find_extra_file now auto-discovers any CSV in mount_dir if filename wrong.
+# If pit_stop_data.csv is wrong, the kernel will auto-discover and log the real filename.
+# Best feature set: iter 012 (working stint features + all 4 crosses, no class_weights).
+# LGBM params: same as best (num_leaves=127, lr=0.05, n_estimators=2000).
+# Expected: +0.003-0.015 AUC over plateau (0.9499).
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+extra_dataset:
+  slug: aadigupta1601/f1-strategy-dataset-pit-stop-prediction
+  file: pit_stop_data.csv
+  mount_dir: /kaggle/input/f1-strategy-dataset-pit-stop-prediction
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - f1_feature_crosses
+  - target_encode_binary
+
+model: lgbm
+
+params:
+  num_leaves: 127
+  n_estimators: 2000
+  early_stopping_rounds: 100
+  learning_rate: 0.05
+  min_child_samples: 20
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
