@@ -131,6 +131,17 @@
       "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
       "note": "Tied best (0.9499); LGBM solo 0.9496, XGB 0.9492; feature set saturated — plateau confirmed",
       "date": "2026-05-10"
+    },
+    {
+      "id": "013_multiseed_lgbm",
+      "cv_auc": 0.9498,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 29,
+      "model": ["lgbm", "lgbm_rf", "lgbm_b", "lgbm_c", "lgbm_d"],
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
+      "note": "5-seed LGBM: all seeds give 0.9492-0.9493, blend 0.9498 — LGBM has zero seed variance; bias-limited not variance-limited",
+      "date": "2026-05-10"
     }
   ],
   "best_cv": "005_lgbm_xgb_blend",
@@ -142,7 +153,8 @@
     "lgbm_xgb_blend_diversity": "+0.0002 from iter 005 blend",
     "lgbm_catboost_blend_diversity": "insufficient with shared target-encoded features",
     "stint_features_were_broken": "iters 001-009 produced no stint_frac/past_half_stint/stint_sq",
-    "feature_set_bottleneck": "12 iters plateau at 0.9479-0.9499; need external data or unused raw columns (TrackStatus, LapTime)",
+    "feature_set_bottleneck": "13 iters plateau at 0.9479-0.9499; model is bias-limited on 439K synthetic rows",
+    "lgbm_seed_variance": "near-zero; 5 seeds all give 0.9492-0.9493; not variance-limited",
     "high_cardinality_te_risk": "compound x driver/race has 100-125 categories; sparse categories shrunk to noise"
   }
 }
