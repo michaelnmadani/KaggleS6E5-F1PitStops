@@ -1,0 +1,46 @@
+
+# Iteration 011 -- Compound×Driver interaction target encoding.
+# New block f1_compound_driver_cross creates two combined categoricals:
+#   compound_x_driver : Compound + Driver (e.g. "SOFT_HAM") -- per-driver stint strategy
+#   compound_x_race   : Compound + Race   (e.g. "SOFT_Monaco") -- per-circuit compound usage
+# Both are then target-encoded by target_encode_binary (smoothed mean P(pit|category)).
+# This captures that Hamilton on Softs has a different pit window than Verstappen on Softs.
+# Base: iter 010 feature set (all stint features working, all 4 crosses active).
+# LGBM params: same as iter 004/005 best (num_leaves=127, lr=0.05) -- isolate feature effect.
+# No class_weights. Expected: +0.002-0.005 AUC over best (0.9499).
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - f1_compound_driver_cross
+  - f1_feature_crosses
+  - target_encode_binary
+
+model: lgbm
+
+params:
+  num_leaves: 127
+  n_estimators: 2000
+  early_stopping_rounds: 100
+  learning_rate: 0.05
+  min_child_samples: 20
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
