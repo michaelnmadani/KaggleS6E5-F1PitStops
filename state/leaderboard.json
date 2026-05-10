@@ -98,6 +98,17 @@
       "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
       "note": "Only 2/4 crosses created — stint_frac missing due to TyreLife detection bug; no class_weights",
       "date": "2026-05-10"
+    },
+    {
+      "id": "010_stint_fix",
+      "cv_auc": 0.9495,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 29,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "f1_feature_crosses", "target_encode_binary"],
+      "note": "Stint features working for first time; deeper num_leaves=255; -0.0004 vs best; feature set is bottleneck",
+      "date": "2026-05-10"
     }
   ],
   "best_cv": "005_lgbm_xgb_blend",
@@ -107,6 +118,8 @@
     "class_weights_balanced_auc_cost": -0.0017,
     "catboost_native_cats_advantage": "+0.0007 AUC vs target-encoded",
     "lgbm_xgb_blend_diversity": "insufficient",
-    "lgbm_catboost_blend_diversity": "insufficient with shared target-encoded features"
+    "lgbm_catboost_blend_diversity": "insufficient with shared target-encoded features",
+    "stint_features_were_broken": "iters 001-009 produced no stint_frac/past_half_stint/stint_sq",
+    "feature_set_bottleneck": "plateau at 0.9479-0.9499; need interaction features like compound x driver"
   }
 }

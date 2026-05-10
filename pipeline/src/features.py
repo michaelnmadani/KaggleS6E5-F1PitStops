@@ -228,6 +228,25 @@ def f1_feature_crosses(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataF
     return X_tr, X_te
 
 
+def f1_compound_driver_cross(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Create Compound×Driver and Compound×Race combined categoricals for target encoding."""
+    X_tr, X_te = X_tr.copy(), X_te.copy()
+    compound_col = next((c for c in X_tr.columns if "compound" in c.lower()), None)
+    driver_col = next((c for c in X_tr.columns if c.lower() == "driver"), None)
+    race_col = next((c for c in X_tr.columns if c.lower() == "race"), None)
+    if compound_col and driver_col:
+        for X in (X_tr, X_te):
+            X["compound_x_driver"] = (
+                X[compound_col].astype(str) + "_" + X[driver_col].astype(str)
+            )
+    if compound_col and race_col:
+        for X in (X_tr, X_te):
+            X["compound_x_race"] = (
+                X[compound_col].astype(str) + "_" + X[race_col].astype(str)
+            )
+    return X_tr, X_te
+
+
 BLOCKS = {
     "label_encode": label_encode,
     "fill_na_median": fill_na_median,
@@ -239,6 +258,7 @@ BLOCKS = {
     "f1_position_features": f1_position_features,
     "f1_race_rolling": f1_race_rolling,
     "f1_feature_crosses": f1_feature_crosses,
+    "f1_compound_driver_cross": f1_compound_driver_cross,
 }
 
 
