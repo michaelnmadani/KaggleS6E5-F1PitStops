@@ -1,0 +1,36 @@
+config: /kaggle/working/iteration_config.yaml
+train=(439140, 15)  test=(188165, 15)  external_rows=0
+global features: ['fill_na_median', 'f1_tyre_features', 'f1_gap_features', 'f1_stint_features', 'f1_position_features', 'f1_feature_crosses'] -> 24 cols
+per-fold features: ['target_encode_binary']
+fold 0 lgbm: auc=0.95004
+fold 0 lgbm_rf: auc=0.95016
+fold 0 lgbm_b: auc=0.95011
+fold 0 lgbm_c: auc=0.95017
+fold 0 lgbm_d: auc=0.95005
+fold 1 lgbm: auc=0.94810
+fold 1 lgbm_rf: auc=0.94800
+fold 1 lgbm_b: auc=0.94808
+fold 1 lgbm_c: auc=0.94806
+fold 1 lgbm_d: auc=0.94823
+fold 2 lgbm: auc=0.94945
+fold 2 lgbm_rf: auc=0.94934
+fold 2 lgbm_b: auc=0.94922
+fold 2 lgbm_c: auc=0.94929
+fold 2 lgbm_d: auc=0.94950
+fold 3 lgbm: auc=0.94891
+fold 3 lgbm_rf: auc=0.94910
+fold 3 lgbm_b: auc=0.94886
+fold 3 lgbm_c: auc=0.94876
+fold 3 lgbm_d: auc=0.94886
+fold 4 lgbm: auc=0.94991
+fold 4 lgbm_rf: auc=0.94974
+fold 4 lgbm_b: auc=0.94974
+fold 4 lgbm_c: auc=0.94970
+fold 4 lgbm_d: auc=0.94979
+model lgbm: CV auc=0.94927
+model lgbm_rf: CV auc=0.94926
+model lgbm_b: CV auc=0.94920
+model lgbm_c: CV auc=0.94919
+model lgbm_d: CV auc=0.94928
+blend weights (score_proportional): {'lgbm': 0.20000593259455865, 'lgbm_rf': 0.2000046095293144, 'lgbm_b': 0.1999912933020098, 'lgbm_c': 0.19998993301540197, 'lgbm_d': 0.2000082315587153}
+CV auc=0.94980  plain_acc=0.89976  balanced_acc=0.83905
