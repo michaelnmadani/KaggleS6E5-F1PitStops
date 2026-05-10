@@ -1,23 +1,20 @@
-# Next Iteration: 008_rolling_features
+# Next Iteration: 009_rolling_no_weights
 
 ## What to change
-Add a new `f1_race_rolling` feature block computing per-driver rolling statistics within each race group:
-- `rolling_laptime_3`: rolling mean of last 3 lap times per driver per race
-- `laptime_vs_rolling`: current LapTime minus rolling mean (pace degradation signal)
-- `stint_pace_degrade`: lap-by-lap slope of lap time within current stint
-- `laps_remaining_est`: estimated laps remaining in race based on total lap count distribution
+LGBM with rolling features (from iter 008) but **no class_weights**. Iter 007 proved that `class_weights: balanced` costs ~0.0017 AUC. This iteration isolates the rolling feature signal cleanly.
 
-These features capture within-race dynamics that static stint counters miss. They require groupby within fold (no leakage) → implemented as a per-fold block.
+Uses: fill_na_median + f1_tyre_features + f1_gap_features + f1_stint_features + f1_position_features + f1_race_rolling + target_encode_binary. No class_weights. LGBM with num_leaves=127 (best hyperparams from iter 004/005).
 
-New block name: `f1_race_rolling` in features.py.
+**Wait for iter 008 results first.** If iter 008 rolling features improve AUC over 005's 0.9499 baseline, iter 009 is the clean combination. If iter 008 does not improve, iter 009 pivots to feature interaction crosses.
 
 ## Why
-Iter 007 (LGBM+CatBoost blend) should confirm whether algorithm diversity gives real AUC gains. If it does, the next lever is new features. If it doesn't, feature engineering is even more critical.
-
-The current 27 features (after target encoding) are all static or aggregate. Rolling lap time trends are the most actionable F1 domain signal for pit timing: teams pit when pace degrades beyond a threshold. The model currently has no direct signal for pace trend.
+- Iter 007 identified class_weights=balanced as a -0.0017 AUC tax — must remove
+- Rolling features (laptime trend, lap delta, driver-race deviation) are the most physics-grounded new signals available in the dataset
+- Combining both learnings (rolling features + no class_weights) should recover at minimum iter 005's 0.9499 and potentially gain +0.003–0.008 from the new features
 
 ## Expected delta in CV AUC
-+0.003–0.008 AUC (from ~0.950 → ~0.953–0.958). Higher variance than prior iters because this requires new feature engineering code.
++0.003–0.008 AUC (from 0.9499 → ~0.953–0.958) if iter 008 rolling features help.
++0.000–+0.002 if rolling features have minimal impact (iter 008 will tell us).
 
 ## Risk
-Medium-high. The rolling groupby must be per-fold (train only) to avoid leakage. Implementation in features.py is new code (additive block). Kaggle runtime ~60–90 min with LGBM.
+Low-medium. LGBM without class_weights is well-understood. Rolling feature block (f1_race_rolling) was just written and untested on Kaggle — iter 008 is the test. Kaggle runtime ~60–90 min.
