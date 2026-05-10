@@ -1,0 +1,63 @@
+[{"stream_name":"stderr","time":7.549254432,"data":"/usr/local/lib/python3.12/dist-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":7.549335279,"data":"  validate(nb)\n"}
+,{"stream_name":"stderr","time":8.772165927,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.772202844,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.772208852,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.772213717,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":9.603064525,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.603102171,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.603106352,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.603109769,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":14.696384913,"data":"mounts under /kaggle/input: ['competitions']\n"}
+,{"stream_name":"stdout","time":14.696446844,"data":"  competitions/: ['playground-series-s6e5']\n"}
+,{"stream_name":"stdout","time":14.696454678,"data":"FALLBACK input_dir=/kaggle/input/competitions/playground-series-s6e5\n"}
+,{"stream_name":"stderr","time":16.808566024,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":16.808599315,"data":"  File \"\u003cstring\u003e\", line 1, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":16.808607403,"data":"  File \"/usr/local/lib/python3.12/dist-packages/papermill/execute.py\", line 131, in execute_notebook\n"}
+,{"stream_name":"stderr","time":16.808676464,"data":"    raise_for_execution_errors(nb, output_path)\n"}
+,{"stream_name":"stderr","time":16.808808277,"data":"  File \"/usr/local/lib/python3.12/dist-packages/papermill/execute.py\", line 251, in raise_for_execution_errors\n"}
+,{"stream_name":"stderr","time":16.808927116,"data":"    raise error\n"}
+,{"stream_name":"stderr","time":16.809264062,"data":"papermill.exceptions.PapermillExecutionError: \n"}
+,{"stream_name":"stderr","time":16.809283094,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":16.809289926,"data":"Exception encountered at \"In [6]\":\n"}
+,{"stream_name":"stderr","time":16.809295781,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":16.809301264,"data":"FileNotFoundError                         Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":16.809307104,"data":"/tmp/ipykernel_16/690332692.py in \u003ccell line: 0\u003e()\n"}
+,{"stream_name":"stderr","time":16.809313144,"data":"     70 cfg_path = pathlib.Path(\"/kaggle/working/iteration_config.yaml\")\n"}
+,{"stream_name":"stderr","time":16.809319386,"data":"     71 cfg_path.write_text(CONFIG_YAML)\n"}
+,{"stream_name":"stderr","time":16.809325088,"data":"---\u003e 72 metrics = run(\n"}
+,{"stream_name":"stderr","time":16.809330828,"data":"     73     config_path=str(cfg_path),\n"}
+,{"stream_name":"stderr","time":16.8093575,"data":"     74     input_dir=input_dir,\n"}
+,{"stream_name":"stderr","time":16.80936258,"data":"\n"}
+,{"stream_name":"stderr","time":16.809366855,"data":"/tmp/ipykernel_16/2254450353.py in run(config_path, input_dir, output_dir)\n"}
+,{"stream_name":"stderr","time":16.809371523,"data":"     69     if extra_cfg and \"slug\" in extra_cfg and \"mount_dir\" not in extra_cfg:\n"}
+,{"stream_name":"stderr","time":16.8093766,"data":"     70         extra_cfg[\"mount_dir\"] = f\"/kaggle/input/{extra_cfg['slug'].split('/')[-1]}\"\n"}
+,{"stream_name":"stderr","time":16.809380224,"data":"---\u003e 71     X, y, X_test, test_ids, inverse_label_map, is_original = load(\n"}
+,{"stream_name":"stderr","time":16.809383424,"data":"     72         Path(input_dir), cfg[\"target\"], cfg[\"id_col\"], extra_dataset=extra_cfg,\n"}
+,{"stream_name":"stderr","time":16.809386726,"data":"     73     )\n"}
+,{"stream_name":"stderr","time":16.809389930000002,"data":"\n"}
+,{"stream_name":"stderr","time":16.809392784,"data":"/tmp/ipykernel_16/1324072522.py in load(input_dir, target, id_col, extra_dataset)\n"}
+,{"stream_name":"stderr","time":16.809395971,"data":"     40 \n"}
+,{"stream_name":"stderr","time":16.809398821,"data":"     41     if extra_dataset:\n"}
+,{"stream_name":"stderr","time":16.809401726,"data":"---\u003e 42         ext_file = _find_extra_file(extra_dataset)\n"}
+,{"stream_name":"stderr","time":16.809404806,"data":"     43         print(f\"extra_dataset resolved to {ext_file}\")\n"}
+,{"stream_name":"stderr","time":16.809408008,"data":"     44         ext = pd.read_csv(ext_file)\n"}
+,{"stream_name":"stderr","time":16.809411057,"data":"\n"}
+,{"stream_name":"stderr","time":16.809413952,"data":"/tmp/ipykernel_16/1324072522.py in _find_extra_file(extra_dataset)\n"}
+,{"stream_name":"stderr","time":16.809417058,"data":"     21     candidates = glob.glob(f\"/kaggle/input/**/{file_name}\", recursive=True)\n"}
+,{"stream_name":"stderr","time":16.809420148,"data":"     22     if not candidates:\n"}
+,{"stream_name":"stderr","time":16.809423504,"data":"---\u003e 23         raise FileNotFoundError(\n"}
+,{"stream_name":"stderr","time":16.809426466,"data":"     24             f\"extra_dataset file {file_name!r} not found under /kaggle/input; \"\n"}
+,{"stream_name":"stderr","time":16.809429651,"data":"     25             f\"tried mount_dir={extra_dataset.get('mount_dir')}\"\n"}
+,{"stream_name":"stderr","time":16.809432659,"data":"\n"}
+,{"stream_name":"stderr","time":16.809435523,"data":"FileNotFoundError: extra_dataset file 'pit_stop_data.csv' not found under /kaggle/input; tried mount_dir=/kaggle/input/f1-strategy-dataset-pit-stop-prediction\n"}
+,{"stream_name":"stderr","time":16.80943895,"data":"\n"}
+,{"stream_name":"stderr","time":19.784682078,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":19.784756463,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":20.008995429,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":20.009027102,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":20.830530332,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":21.258314916,"data":"[NbConvertApp] Writing 71250 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":24.648439141,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":26.048829454,"data":"[NbConvertApp] Writing 557587 bytes to __results__.html\n"}
+]

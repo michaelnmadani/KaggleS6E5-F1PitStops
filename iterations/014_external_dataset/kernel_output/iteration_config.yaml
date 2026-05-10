@@ -1,0 +1,51 @@
+
+# Iteration 014 -- External F1 dataset to break the 0.9499 plateau.
+# 13 iterations have proven the 439K synthetic rows are fully saturated at 0.9499 AUC.
+# Adding real F1 race data (the source dataset that generated the competition data)
+# may provide orders of magnitude more training samples with the same signal structure.
+# External dataset: aadigupta1601/f1-strategy-dataset-pit-stop-prediction
+# Data.py dedupe logic removes any test-row duplicates automatically.
+# NOTE: If the file name is wrong, the kernel will fail with a FileNotFoundError
+# showing the actual /kaggle/input directory structure -- fix the file name and rerun.
+# Best feature set: iter 010 (working stint features + all 4 crosses).
+# LGBM params: same as best (num_leaves=127, lr=0.05, n_estimators=2000).
+# No class_weights. Expected: +0.003-0.015 AUC over best (0.9499).
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+extra_dataset:
+  file: pit_stop_data.csv
+  mount_dir: /kaggle/input/f1-strategy-dataset-pit-stop-prediction
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - f1_feature_crosses
+  - target_encode_binary
+
+model: lgbm
+
+params:
+  num_leaves: 127
+  n_estimators: 2000
+  early_stopping_rounds: 100
+  learning_rate: 0.05
+  min_child_samples: 20
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
