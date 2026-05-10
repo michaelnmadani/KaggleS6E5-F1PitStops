@@ -1,0 +1,45 @@
+
+# Iteration 009 -- Feature interaction crosses, NO class_weights.
+# New global block f1_feature_crosses adds 4 pairwise products:
+#   tyre_x_gap       : TyreLife * GapToLeader
+#   tyre_x_stintfrac : TyreLife * stint_frac
+#   stintfrac_x_pos  : stint_frac * Position
+#   tyresq_x_gap     : TyreLife^2 * GapToLeader
+# No class_weights (iter 007 proved -0.0017 AUC cost).
+# LGBM tuned params from iter 004/005 (best single-model baseline).
+# Expected: +0.001-0.004 AUC over best (0.9499).
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - f1_feature_crosses
+  - target_encode_binary
+
+model: lgbm
+
+params:
+  num_leaves: 127
+  n_estimators: 2000
+  early_stopping_rounds: 100
+  learning_rate: 0.05
+  min_child_samples: 20
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
