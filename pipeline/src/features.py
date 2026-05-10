@@ -90,11 +90,7 @@ def target_encode_binary(
 
 
 def f1_tyre_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """F1-specific: tyre age polynomial and log features.
-
-    Adds tyre_life_sq, tyre_life_log1p, and tyre_life_pct_lap.
-    Column detection is heuristic — checks for 'tyre'+'life'/'age'/'lap' substrings.
-    No-op if the expected columns are absent."""
+    """F1-specific: tyre age polynomial and log features."""
     X_tr, X_te = X_tr.copy(), X_te.copy()
     tyre_col = next(
         (c for c in X_tr.columns if "tyre" in c.lower() and any(k in c.lower() for k in ("life", "age", "lap"))),
@@ -116,9 +112,7 @@ def f1_tyre_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFra
 
 
 def f1_gap_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """F1-specific: log-transform all gap columns and add abs versions.
-
-    Identifies columns with 'gap' in the name and adds {col}_log1p and {col}_abs."""
+    """F1-specific: log-transform all gap columns and add abs versions."""
     X_tr, X_te = X_tr.copy(), X_te.copy()
     gap_cols = [c for c in X_tr.columns if "gap" in c.lower()]
     for col in gap_cols:
@@ -130,13 +124,7 @@ def f1_gap_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFram
 
 
 def f1_stint_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """F1-specific: stint-based features.
-
-    Detects StintLength / LapsOnTyre / TyreAge-style column and creates:
-    - stint_remaining_est: rough estimate based on compound median life
-    - past_half_stint: binary flag
-
-    No-op if relevant columns are absent."""
+    """F1-specific: stint fraction and polynomial features."""
     X_tr, X_te = X_tr.copy(), X_te.copy()
     stint_col = next(
         (c for c in X_tr.columns if any(k in c.lower() for k in ("stint", "lapsontyre", "tyreage", "tyre_age"))),
@@ -157,9 +145,7 @@ def f1_stint_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFr
 
 
 def f1_position_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """F1-specific: position and lap-progress features.
-
-    Adds position_inv (1/position), lap_pct (lap/total_laps if both present)."""
+    """F1-specific: position inverse and lap-progress fraction."""
     X_tr, X_te = X_tr.copy(), X_te.copy()
     pos_col = next((c for c in X_tr.columns if c.lower() in ("position", "raceposition", "race_position")), None)
     lap_col = next((c for c in X_tr.columns if c.lower() in ("lapnumber", "lap_number", "lap")), None)
@@ -175,6 +161,74 @@ def f1_position_features(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.Dat
     return X_tr, X_te
 
 
+def f1_race_rolling(
+    X_tr: pd.DataFrame, X_te: pd.DataFrame, y_tr=None
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Per-fold rolling lap-time features within each (Race, Driver) group.
+
+    Training rows: sorted by LapNumber, shift(1).rolling(3) to avoid leakage.
+    Val/test rows: per-(Race, Driver) training aggregates as a proxy.
+    Adds: rolling_lt3, laptime_d1 (lap-to-lap delta), lt_vs_dr_mean.
+    No-op if LapTime / LapNumber / Driver / Race columns are absent."""
+    X_tr, X_te = X_tr.copy(), X_te.copy()
+
+    lap_col = next(
+        (c for c in X_tr.columns if c.lower() in ("lapnumber", "lap_number")), None
+    )
+    time_col = next(
+        (c for c in X_tr.columns if "laptime" in c.lower() or c.lower() == "lap_time"), None
+    )
+    driver_col = next((c for c in X_tr.columns if c.lower() == "driver"), None)
+    race_col = next((c for c in X_tr.columns if c.lower() == "race"), None)
+
+    if not all([lap_col, time_col, driver_col, race_col]):
+        return X_tr, X_te
+
+    grp = [race_col, driver_col]
+
+    # Training: sort by (Race, Driver, LapNumber), compute rolling/diff, restore order.
+    tr = X_tr.reset_index(drop=True)
+    order = tr.sort_values(grp + [lap_col]).index
+    ts = tr.loc[order].copy()
+    g = ts.groupby(grp, sort=False)
+    ts["rolling_lt3"] = g[time_col].transform(
+        lambda x: x.shift(1).rolling(3, min_periods=1).mean()
+    )
+    ts["laptime_d1"] = g[time_col].transform("diff")
+    ts_back = ts.iloc[np.argsort(np.argsort(order))]  # inverse permutation -> original order
+    X_tr["rolling_lt3"] = ts_back["rolling_lt3"].values
+    X_tr["laptime_d1"] = ts_back["laptime_d1"].values
+
+    # Per-group training aggregates (proxy for val/test).
+    agg = (
+        X_tr.groupby(grp, observed=True)
+        .agg(_lt_mean=(time_col, "mean"), _roll_proxy=("rolling_lt3", "mean"))
+        .reset_index()
+    )
+
+    # LapTime deviation from per-(Race, Driver) mean -- training.
+    X_tr = X_tr.merge(agg[grp + ["_lt_mean"]], on=grp, how="left")
+    X_tr["lt_vs_dr_mean"] = X_tr[time_col] - X_tr["_lt_mean"]
+    X_tr.drop(columns=["_lt_mean"], inplace=True)
+
+    # Val/test: merge proxy rolling mean and compute deviation.
+    X_te = X_te.merge(agg, on=grp, how="left")
+    global_roll = float(X_tr["rolling_lt3"].median())
+    global_lt = float(X_tr[time_col].median())
+    X_te["rolling_lt3"] = X_te["_roll_proxy"].fillna(global_roll)
+    X_te["laptime_d1"] = 0.0
+    X_te["lt_vs_dr_mean"] = X_te[time_col] - X_te["_lt_mean"].fillna(global_lt)
+    X_te.drop(columns=["_lt_mean", "_roll_proxy"], inplace=True, errors="ignore")
+
+    # Fill NaN in training (first lap of each stint has no prior -> fill with median).
+    for col in ("rolling_lt3", "laptime_d1", "lt_vs_dr_mean"):
+        fill = float(X_tr[col].median())
+        X_tr[col] = X_tr[col].fillna(fill)
+        X_te[col] = X_te[col].fillna(fill)
+
+    return X_tr, X_te
+
+
 BLOCKS = {
     "label_encode": label_encode,
     "fill_na_median": fill_na_median,
@@ -184,6 +238,7 @@ BLOCKS = {
     "f1_gap_features": f1_gap_features,
     "f1_stint_features": f1_stint_features,
     "f1_position_features": f1_position_features,
+    "f1_race_rolling": f1_race_rolling,
 }
 
 
