@@ -12,6 +12,17 @@
       "date": "2026-05-09"
     },
     {
+      "id": "002_f1_features",
+      "cv_auc": 0.9491,
+      "cv_std": 0.0008,
+      "lb_auc": null,
+      "n_features": 22,
+      "model": "lgbm",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "label_encode"],
+      "note": "F1 domain feature blocks; small +0.0005 lift; categoricals still label-encoded",
+      "date": "2026-05-09"
+    },
+    {
       "id": "003_target_encode",
       "cv_auc": null,
       "cv_std": null,
@@ -23,17 +34,6 @@
       "date": "2026-05-09"
     },
     {
-      "id": "005_lgbm_xgb_blend",
-      "cv_auc": 0.9499,
-      "cv_std": 0.0008,
-      "lb_auc": null,
-      "n_features": 27,
-      "model": ["lgbm", "xgb"],
-      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
-      "note": "50/50 blend; LGBM/XGB too correlated for diversity (+0.0002 only)",
-      "date": "2026-05-09"
-    },
-    {
       "id": "004_target_encode_fix",
       "cv_auc": 0.9497,
       "cv_std": 0.0009,
@@ -41,21 +41,32 @@
       "n_features": 27,
       "model": "lgbm",
       "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
-      "note": "Fixed target_encode_binary + num_leaves=127; new best CV",
+      "note": "Fixed target_encode_binary + num_leaves=127",
       "date": "2026-05-09"
     },
     {
-      "id": "002_f1_features",
-      "cv_auc": 0.9491,
+      "id": "005_lgbm_xgb_blend",
+      "cv_auc": 0.9499,
       "cv_std": 0.0008,
       "lb_auc": null,
-      "n_features": 22,
-      "model": "lgbm",
-      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "label_encode"],
-      "note": "F1 domain feature blocks; small +0.0005 lift; categoricals still label-encoded",
+      "n_features": 27,
+      "model": ["lgbm", "xgb"],
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features", "target_encode_binary"],
+      "note": "50/50 blend; LGBM/XGB too correlated (+0.0002 only); BEST CV",
       "date": "2026-05-09"
+    },
+    {
+      "id": "006_catboost",
+      "cv_auc": 0.9496,
+      "cv_std": 0.0007,
+      "lb_auc": null,
+      "n_features": 22,
+      "model": "catboost",
+      "features": ["fill_na_median", "f1_tyre_features", "f1_gap_features", "f1_stint_features", "f1_position_features"],
+      "note": "CatBoost native cats + balanced class weights; balanced_acc 0.886 (+4.6pp vs 005)",
+      "date": "2026-05-10"
     }
   ],
-  "best_cv": "004_target_encode_fix",
+  "best_cv": "005_lgbm_xgb_blend",
   "target_top5pct_auc": 0.965
 }

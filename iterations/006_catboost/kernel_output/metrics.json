@@ -1,0 +1,27 @@
+{
+  "cv_score": 0.9495535173144256,
+  "metric": "auc",
+  "plain_accuracy": 0.8731361297080658,
+  "balanced_accuracy": 0.8857907278210262,
+  "fold_scores": [
+    0.950499555223558,
+    0.9485443263025577,
+    0.9496926253402243,
+    0.9490800589097323,
+    0.9499741389705616
+  ],
+  "fold_mean": 0.9495581409493268,
+  "fold_std": 0.0006831959917006162,
+  "elapsed_sec": 4234.6,
+  "model": "catboost",
+  "per_model_cv": {
+    "catboost": 0.9495535173144256
+  },
+  "blend_weights": {
+    "catboost": 1.0
+  },
+  "postprocess": null,
+  "n_features": 22,
+  "n_train": 439140,
+  "n_test": 188165
+}
