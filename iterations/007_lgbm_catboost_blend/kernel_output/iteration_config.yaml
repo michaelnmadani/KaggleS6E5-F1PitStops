@@ -1,0 +1,53 @@
+
+# Iteration 007 — LGBM + CatBoost blend with target-encoded features.
+# Both models share the same 27-feature target-encoded set so the pipeline
+# is compatible. Algorithm diversity (ordered boosting vs leaf-wise) provides
+# meaningful OOF calibration differences (balanced_acc gap of 4.6pp in 006).
+# class_weights: balanced kept from 006 (proved effective).
+# Expected: +0.001–0.003 AUC over 005's 0.9499.
+
+target: PitNextLap
+id_col: id
+task: binary
+metric: auc
+
+features:
+  - fill_na_median
+  - f1_tyre_features
+  - f1_gap_features
+  - f1_stint_features
+  - f1_position_features
+  - target_encode_binary
+
+model:
+  - lgbm
+  - catboost
+
+class_weights: balanced
+
+params:
+  lgbm:
+    num_leaves: 127
+    n_estimators: 2000
+    early_stopping_rounds: 100
+    learning_rate: 0.05
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+  catboost:
+    iterations: 3000
+    early_stopping_rounds: 100
+    learning_rate: 0.03
+    depth: 8
+    l2_leaf_reg: 3.0
+    random_seed: 42
+
+cv:
+  n_splits: 5
+  seed: 42
+  stratified: true
+
+kernel:
+  enable_gpu: false
