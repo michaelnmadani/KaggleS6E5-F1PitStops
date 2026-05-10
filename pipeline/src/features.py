@@ -81,8 +81,7 @@ def target_encode_binary(
         smooth_dict = smooth.to_dict()
         X_tr[f"{col}_te"] = np.asarray(src_tr.map(smooth_dict).astype(float).fillna(global_mean))
         X_te[f"{col}_te"] = np.asarray(src_te.map(smooth_dict).astype(float).fillna(global_mean))
-    # Drop original object columns — LightGBM cannot accept object dtype.
-    # Low-cardinality integer columns are kept (already numeric).
+    # Drop original object columns -- LightGBM cannot accept object dtype.
     obj_encoded = [c for c in cat_like if X_tr[c].dtype == object]
     X_tr = X_tr.drop(columns=obj_encoded)
     X_te = X_te.drop(columns=obj_encoded)
@@ -186,7 +185,6 @@ def f1_race_rolling(
 
     grp = [race_col, driver_col]
 
-    # Training: sort by (Race, Driver, LapNumber), compute rolling/diff, restore order.
     tr = X_tr.reset_index(drop=True)
     order = tr.sort_values(grp + [lap_col]).index
     ts = tr.loc[order].copy()
@@ -195,23 +193,20 @@ def f1_race_rolling(
         lambda x: x.shift(1).rolling(3, min_periods=1).mean()
     )
     ts["laptime_d1"] = g[time_col].transform("diff")
-    ts_back = ts.iloc[np.argsort(np.argsort(order))]  # inverse permutation -> original order
+    ts_back = ts.iloc[np.argsort(np.argsort(order))]
     X_tr["rolling_lt3"] = ts_back["rolling_lt3"].values
     X_tr["laptime_d1"] = ts_back["laptime_d1"].values
 
-    # Per-group training aggregates (proxy for val/test).
     agg = (
         X_tr.groupby(grp, observed=True)
         .agg(_lt_mean=(time_col, "mean"), _roll_proxy=("rolling_lt3", "mean"))
         .reset_index()
     )
 
-    # LapTime deviation from per-(Race, Driver) mean -- training.
     X_tr = X_tr.merge(agg[grp + ["_lt_mean"]], on=grp, how="left")
     X_tr["lt_vs_dr_mean"] = X_tr[time_col] - X_tr["_lt_mean"]
     X_tr.drop(columns=["_lt_mean"], inplace=True)
 
-    # Val/test: merge proxy rolling mean and compute deviation.
     X_te = X_te.merge(agg, on=grp, how="left")
     global_roll = float(X_tr["rolling_lt3"].median())
     global_lt = float(X_tr[time_col].median())
@@ -220,12 +215,47 @@ def f1_race_rolling(
     X_te["lt_vs_dr_mean"] = X_te[time_col] - X_te["_lt_mean"].fillna(global_lt)
     X_te.drop(columns=["_lt_mean", "_roll_proxy"], inplace=True, errors="ignore")
 
-    # Fill NaN in training (first lap of each stint has no prior -> fill with median).
     for col in ("rolling_lt3", "laptime_d1", "lt_vs_dr_mean"):
         fill = float(X_tr[col].median())
         X_tr[col] = X_tr[col].fillna(fill)
         X_te[col] = X_te[col].fillna(fill)
 
+    return X_tr, X_te
+
+
+def f1_feature_crosses(X_tr: pd.DataFrame, X_te: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Pairwise interaction features for key F1 signals.
+
+    Multiplies column pairs that are physically meaningful for pit timing:
+    tyre age x gap, stint fraction x position, tyre age x stint fraction.
+    All inputs must already exist (run after tyre/gap/stint/position blocks).
+    No-op for any pair where a column is missing."""
+    X_tr, X_te = X_tr.copy(), X_te.copy()
+
+    tyre_col = next(
+        (c for c in X_tr.columns if "tyre" in c.lower() and any(k in c.lower() for k in ("life", "age", "lap"))
+         and "sq" not in c.lower() and "log" not in c.lower() and "pct" not in c.lower()),
+        None,
+    )
+    gap_col = next(
+        (c for c in X_tr.columns if "gap" in c.lower() and "abs" not in c.lower() and "log" not in c.lower()),
+        None,
+    )
+    stint_frac_col = "stint_frac" if "stint_frac" in X_tr.columns else None
+    position_col = next(
+        (c for c in X_tr.columns if c.lower() in ("position", "raceposition", "race_position")), None
+    )
+
+    pairs = [
+        (tyre_col, gap_col, "tyre_x_gap"),
+        (tyre_col, stint_frac_col, "tyre_x_stintfrac"),
+        (stint_frac_col, position_col, "stintfrac_x_pos"),
+        ("tyre_life_sq", gap_col, "tyresq_x_gap"),
+    ]
+    for c1, c2, name in pairs:
+        if c1 and c2 and c1 in X_tr.columns and c2 in X_tr.columns:
+            for X in (X_tr, X_te):
+                X[name] = X[c1].astype(float).fillna(0.0) * X[c2].astype(float).fillna(0.0)
     return X_tr, X_te
 
 
@@ -239,6 +269,7 @@ BLOCKS = {
     "f1_stint_features": f1_stint_features,
     "f1_position_features": f1_position_features,
     "f1_race_rolling": f1_race_rolling,
+    "f1_feature_crosses": f1_feature_crosses,
 }
 
 
