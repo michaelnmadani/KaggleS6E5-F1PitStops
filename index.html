@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaggle S6E5 — F1 Pit Stop Prediction</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3248;
+    --text: #e8eaf6;
+    --muted: #8b90b0;
+    --accent: #e10600;
+    --accent2: #ff6b35;
+    --green: #00d084;
+    --yellow: #f5a623;
+    --red: #ff4757;
+    --blue: #4a9eff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.6; }
+  a { color: var(--accent2); text-decoration: none; }
+
+  /* Layout */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0; }
+  .header-inner { display: flex; align-items: center; gap: 16px; padding: 18px 24px; max-width: 1200px; margin: 0 auto; }
+  .f1-logo { font-size: 22px; font-weight: 900; letter-spacing: -1px; color: var(--accent); font-style: italic; }
+  .header-title { flex: 1; }
+  .header-title h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+  .header-title p { font-size: 12px; color: var(--muted); }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(225,6,0,0.15); color: var(--accent); border: 1px solid rgba(225,6,0,0.3); }
+
+  /* Grid */
+  .grid { display: grid; gap: 16px; padding: 24px 0; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-2 { grid-template-columns: 2fr 1fr; }
+  @media (max-width: 900px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
+  @media (max-width: 500px) { .grid-4 { grid-template-columns: 1fr 1fr; } }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .stat-delta { font-size: 12px; font-weight: 600; margin-top: 4px; }
+  .delta-pos { color: var(--green); }
+  .delta-neg { color: var(--red); }
+  .delta-neu { color: var(--muted); }
+
+  /* Progress bar */
+  .progress-wrap { margin-top: 10px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .progress-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+  .fill-red { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .fill-green { background: var(--green); }
+  .fill-yellow { background: var(--yellow); }
+
+  /* Chart */
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .chart-header h2 { font-size: 14px; font-weight: 700; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Table */
+  .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .table-card h2 { font-size: 14px; font-weight: 700; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  td { padding: 10px 16px; border-bottom: 1px solid rgba(46,50,72,0.5); font-size: 13px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .iter-id { font-family: monospace; font-size: 12px; color: var(--muted); }
+  .auc-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .auc-best { color: var(--green); }
+  .auc-good { color: var(--blue); }
+  .auc-low { color: var(--yellow); }
+  .auc-crash { color: var(--muted); }
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-right: 3px; }
+  .tag-lgbm { background: rgba(74,158,255,0.15); color: var(--blue); }
+  .tag-xgb { background: rgba(245,166,35,0.15); color: var(--yellow); }
+  .tag-cat { background: rgba(0,208,132,0.15); color: var(--green); }
+  .tag-blend { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .status-pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .pill-best { background: rgba(0,208,132,0.2); color: var(--green); }
+  .pill-crashed { background: rgba(255,71,87,0.15); color: var(--red); }
+  .note-cell { color: var(--muted); font-size: 12px; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Findings */
+  .findings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .findings-card h2 { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+  .finding { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+  .finding-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+  .icon-red { background: rgba(225,6,0,0.2); color: var(--accent); }
+  .icon-green { background: rgba(0,208,132,0.2); color: var(--green); }
+  .icon-yellow { background: rgba(245,166,35,0.2); color: var(--yellow); }
+  .icon-blue { background: rgba(74,158,255,0.2); color: var(--blue); }
+  .finding-text { font-size: 13px; color: var(--muted); }
+  .finding-text strong { color: var(--text); }
+
+  footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="f1-logo">F1</div>
+    <div class="header-title">
+      <h1>Kaggle Playground S6E5 — F1 Pit Stop Prediction</h1>
+      <p>Binary classification · AUC-ROC · Target: top 1% ≥ 0.970</p>
+    </div>
+    <span class="badge">In Progress</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Stat cards -->
+  <div class="grid grid-4" style="padding-top:24px;">
+
+    <div class="card">
+      <div class="card-title">Best CV AUC</div>
+      <div class="stat-value" style="color:var(--green)">0.9499</div>
+      <div class="stat-sub">Iters 005 &amp; 012 (LGBM+XGB blend)</div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Baseline 0.9486</span><span>Top 1% 0.970</span></div>
+        <div class="progress-track"><div class="progress-fill fill-red" style="width:59%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Top 5% Target</div>
+      <div class="stat-value" style="color:var(--yellow)">0.965</div>
+      <div class="stat-sub">Gap from best: <strong style="color:var(--red)">−0.0151</strong></div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Current</span><span>Target</span></div>
+        <div class="progress-track"><div class="progress-fill fill-yellow" style="width:72%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Top 1% Target</div>
+      <div class="stat-value" style="color:var(--accent2)">0.970</div>
+      <div class="stat-sub">Gap from best: <strong style="color:var(--red)">−0.0201</strong></div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Current</span><span>Target</span></div>
+        <div class="progress-track"><div class="progress-fill fill-red" style="width:59%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Iterations Run</div>
+      <div class="stat-value">15</div>
+      <div class="stat-sub">14 completed · 2 crashed · 1 running</div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>0.9486</span><span style="color:var(--green)">0.9499 ▲</span></div>
+        <div class="progress-track"><div class="progress-fill fill-green" style="width:100%"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Chart + Findings -->
+  <div class="grid grid-2">
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2>CV AUC Progression</h2>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>CV AUC</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent);opacity:0.5"></div>Top 5% target</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent2);opacity:0.5"></div>Top 1% target</div>
+        </div>
+      </div>
+      <canvas id="aucChart" height="240"></canvas>
+    </div>
+
+    <div class="findings-card">
+      <h2>Key Findings</h2>
+
+      <div class="finding">
+        <div class="finding-icon icon-red">✕</div>
+        <div class="finding-text"><strong>class_weights=balanced costs −0.0017 AUC.</strong> Hurts discrimination even though it helps balanced accuracy.</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon icon-green">↑</div>
+        <div class="finding-text"><strong>LGBM+XGB blend: +0.0002.</strong> Best single diversity signal found — model families differ enough to blend.</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon icon-red">⚠</div>
+        <div class="finding-text"><strong>LGBM seed variance: near zero.</strong> 5 seeds all give 0.9492–0.9493. Model is bias-limited, not variance-limited.</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon icon-yellow">⚙</div>
+        <div class="finding-text"><strong>Stint features were broken iters 001–009.</strong> TyreLife detection bug silently zeroed out stint_frac, past_half_stint, stint_sq.</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon icon-red">✕</div>
+        <div class="finding-text"><strong>High-cardinality TE hurts.</strong> Compound×Driver/Race (100–125 categories) adds noise — sparse groups shrink to global mean.</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon icon-blue">→</div>
+        <div class="finding-text"><strong>Plateau at 0.9499 confirmed.</strong> 13 iters on 439K synthetic rows are fully saturated. External data is the key lever.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Iterations table -->
+  <div class="table-card" style="margin-bottom:8px;">
+    <h2>All Iterations</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Iter</th>
+          <th>CV AUC</th>
+          <th>±std</th>
+          <th>LB AUC</th>
+          <th>Features</th>
+          <th>Model</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="iter-id">001</td>
+          <td class="auc-val auc-low">0.9486</td>
+          <td class="auc-crash">±0.0007</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">baseline</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">Baseline — no F1 feature engineering</td>
+        </tr>
+        <tr>
+          <td class="iter-id">002</td>
+          <td class="auc-val auc-good">0.9491</td>
+          <td class="auc-crash">±0.0008</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">f1_tyre</span><span class="tag tag-lgbm">f1_gap</span><span class="tag tag-lgbm">+3</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">F1 domain features +0.0005</td>
+        </tr>
+        <tr>
+          <td class="iter-id">003</td>
+          <td class="auc-crash">CRASHED</td>
+          <td class="auc-crash">—</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">target_enc</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell"><span class="status-pill pill-crashed">crash</span> object dtype bug in target_encode_binary</td>
+        </tr>
+        <tr>
+          <td class="iter-id">004</td>
+          <td class="auc-val auc-good">0.9497</td>
+          <td class="auc-crash">±0.0009</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">target_enc</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">Fixed TE + num_leaves=127</td>
+        </tr>
+        <tr style="background:rgba(0,208,132,0.03)">
+          <td class="iter-id">005</td>
+          <td class="auc-val auc-best">0.9499 <span class="status-pill pill-best">BEST</span></td>
+          <td class="auc-crash">±0.0008</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">target_enc</span></td>
+          <td><span class="tag tag-blend">LGBM+XGB</span></td>
+          <td class="note-cell">50/50 blend — first best</td>
+        </tr>
+        <tr>
+          <td class="iter-id">006</td>
+          <td class="auc-val auc-good">0.9496</td>
+          <td class="auc-crash">±0.0007</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-cat">native cats</span></td>
+          <td><span class="tag tag-cat">CatBoost</span></td>
+          <td class="note-cell">Native categoricals; class_weights hurt AUC</td>
+        </tr>
+        <tr>
+          <td class="iter-id">007</td>
+          <td class="auc-val auc-low">0.9494</td>
+          <td class="auc-crash">±0.0009</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">target_enc</span></td>
+          <td><span class="tag tag-blend">LGBM+CB</span></td>
+          <td class="note-cell">class_weights=balanced costs −0.0017 AUC</td>
+        </tr>
+        <tr>
+          <td class="iter-id">008</td>
+          <td class="auc-val auc-low">0.9479</td>
+          <td class="auc-crash">±0.0009</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">rolling</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">Rolling features hurt — random folds break temporal order</td>
+        </tr>
+        <tr>
+          <td class="iter-id">009</td>
+          <td class="auc-val auc-good">0.9492</td>
+          <td class="auc-crash">±0.0007</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">crosses</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">2/4 crosses — stint_frac missing (TyreLife bug)</td>
+        </tr>
+        <tr>
+          <td class="iter-id">010</td>
+          <td class="auc-val auc-good">0.9495</td>
+          <td class="auc-crash">±0.0007</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">crosses</span><span class="tag tag-lgbm">stint✓</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">Stint features fixed; num_leaves=255</td>
+        </tr>
+        <tr>
+          <td class="iter-id">011</td>
+          <td class="auc-val auc-good">0.9492</td>
+          <td class="auc-crash">±0.0008</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">comp×driver</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">High-cardinality TE hurts — sparse noise</td>
+        </tr>
+        <tr style="background:rgba(0,208,132,0.03)">
+          <td class="iter-id">012</td>
+          <td class="auc-val auc-best">0.9499 <span class="status-pill pill-best">BEST</span></td>
+          <td class="auc-crash">±0.0008</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">crosses</span><span class="tag tag-lgbm">stint✓</span></td>
+          <td><span class="tag tag-blend">LGBM+XGB</span></td>
+          <td class="note-cell">Tied best — plateau confirmed</td>
+        </tr>
+        <tr>
+          <td class="iter-id">013</td>
+          <td class="auc-val auc-good">0.9498</td>
+          <td class="auc-crash">±0.0007</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">crosses</span><span class="tag tag-lgbm">stint✓</span></td>
+          <td><span class="tag tag-blend">5×LGBM</span></td>
+          <td class="note-cell">5-seed ensemble — zero seed variance</td>
+        </tr>
+        <tr>
+          <td class="iter-id">014</td>
+          <td class="auc-crash">CRASHED</td>
+          <td class="auc-crash">—</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">ext data</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell"><span class="status-pill pill-crashed">crash</span> missing slug field — dataset not mounted</td>
+        </tr>
+        <tr style="background:rgba(74,158,255,0.03)">
+          <td class="iter-id">015</td>
+          <td class="auc-crash" style="color:var(--blue)">Running…</td>
+          <td class="auc-crash">—</td>
+          <td class="auc-crash">—</td>
+          <td><span class="tag tag-lgbm">ext data✓</span></td>
+          <td><span class="tag tag-lgbm">LGBM</span></td>
+          <td class="note-cell">External F1 dataset — slug fix + auto-discover CSV</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  Kaggle Playground Series S6E5 &nbsp;·&nbsp; F1 Pit Stop Prediction &nbsp;·&nbsp; Powered by Claude + GitHub Actions
+</footer>
+
+<script>
+const ctx = document.getElementById('aucChart').getContext('2d');
+
+const labels = ['001','002','003','004','005','006','007','008','009','010','011','012','013','014'];
+const aucs   = [0.9486, 0.9491, null, 0.9497, 0.9499, 0.9496, 0.9494, 0.9479, 0.9492, 0.9495, 0.9492, 0.9499, 0.9498, null];
+
+Chart.defaults.color = '#8b90b0';
+Chart.defaults.borderColor = '#2e3248';
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'CV AUC',
+        data: aucs,
+        borderColor: '#00d084',
+        backgroundColor: 'rgba(0,208,132,0.08)',
+        pointBackgroundColor: aucs.map(v =>
+          v === null ? 'transparent' :
+          v >= 0.9499 ? '#00d084' :
+          v >= 0.9495 ? '#4a9eff' : '#f5a623'
+        ),
+        pointBorderColor: aucs.map(v =>
+          v === null ? 'transparent' : v >= 0.9499 ? '#00d084' : '#2e3248'
+        ),
+        pointRadius: aucs.map(v => v === null ? 0 : 5),
+        pointHoverRadius: 7,
+        borderWidth: 2,
+        tension: 0.3,
+        spanGaps: false,
+        fill: true,
+      },
+      {
+        label: 'Top 5% (0.965)',
+        data: Array(14).fill(0.965),
+        borderColor: 'rgba(225,6,0,0.4)',
+        borderDash: [5,4],
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: false,
+      },
+      {
+        label: 'Top 1% (0.970)',
+        data: Array(14).fill(0.970),
+        borderColor: 'rgba(255,107,53,0.4)',
+        borderDash: [5,4],
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: false,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a1d27',
+        borderColor: '#2e3248',
+        borderWidth: 1,
+        callbacks: {
+          label: ctx => {
+            if (ctx.datasetIndex === 0) {
+              const v = ctx.parsed.y;
+              return v == null ? ' CRASHED' : ` CV AUC: ${v.toFixed(4)}`;
+            }
+            return ` ${ctx.dataset.label}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(46,50,72,0.5)' },
+        ticks: { font: { size: 11 } }
+      },
+      y: {
+        min: 0.945,
+        max: 0.975,
+        grid: { color: 'rgba(46,50,72,0.5)' },
+        ticks: {
+          font: { size: 11 },
+          callback: v => v.toFixed(3)
+        }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
