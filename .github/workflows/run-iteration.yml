@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 600  # 10 hrs; kernel polling caps at 9 hrs
     env:
       KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
       COMP_SLUG: ${{ vars.COMP_SLUG }}
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
       - name: Configure Kaggle auth
         run: |
           mkdir -p ~/.kaggle
-          echo '{"username":"'"${KAGGLE_USERNAME}"'","key":"'"${KAGGLE_API_TOKEN}"'"}' > ~/.kaggle/kaggle.json
+          echo '{"username":"'"${KAGGLE_USERNAME}"'","key":"'"${KAGGLE_KEY}"'"}' > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
 
       - name: Build kernel
@@ -71,7 +71,7 @@ jobs:
           URL="https://www.kaggle.com/api/v1/kernels/status?userName=${KAGGLE_USERNAME}&kernelSlug=${SLUG}"
           echo "Polling ${KAGGLE_USERNAME}/${SLUG}"
           for i in $(seq 1 540); do
-            BODY=$(curl -sS -H "Authorization: Bearer ${KAGGLE_API_TOKEN}" -H "Accept: application/json" "$URL" || echo '{"status":"poll_error"}')
+            BODY=$(curl -sS -u "${KAGGLE_USERNAME}:${KAGGLE_KEY}" -H "Accept: application/json" "$URL" || echo '{"status":"poll_error"}')
             STATUS=$(echo "$BODY" | jq -r '.status // "unknown"')
             MSG=$(echo "$BODY"    | jq -r '.failureMessage // ""')
             echo "[$i] status=$STATUS msg=$MSG"

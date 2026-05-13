@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
       COMP_SLUG: ${{ vars.COMP_SLUG }}
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
       - name: Configure Kaggle auth
         run: |
           mkdir -p ~/.kaggle
-          echo '{"username":"'"${KAGGLE_USERNAME}"'","key":"'"${KAGGLE_API_TOKEN}"'"}' > ~/.kaggle/kaggle.json
+          echo '{"username":"'"${KAGGLE_USERNAME}"'","key":"'"${KAGGLE_KEY}"'"}' > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
 
       - name: Submit
@@ -65,9 +65,12 @@ jobs:
           python - <<PY
           import json, pathlib
           p = pathlib.Path("state/leaderboard.json")
-          lb = json.loads(p.read_text()) if p.exists() else {}
-          lb.setdefault("$ITER", {})["public_lb"] = "$SCORE"
-          p.write_text(json.dumps(lb, indent=2, sort_keys=True))
+          lb = json.loads(p.read_text()) if p.exists() else {"iterations": []}
+          for entry in lb.get("iterations", []):
+              if entry.get("id") == "$ITER":
+                  entry["lb_auc"] = float("$SCORE") if "$SCORE" else None
+                  break
+          p.write_text(json.dumps(lb, indent=2))
           PY
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
